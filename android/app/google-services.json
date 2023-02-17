@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "1009737711764",
+    "project_id": "dacn-ec907",
+    "storage_bucket": "dacn-ec907.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1009737711764:android:658f5fd875e4300e023481",
+        "android_client_info": {
+          "package_name": "com.bkaccess"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "1009737711764-8g5hm3rb6qu4evbvjdg7ti8di3k9scib.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.bkaccess",
+            "certificate_hash": "5e8f16062ea3cd2c4a0d547876baa6f38cabf625"
+          }
+        },
+        {
+          "client_id": "1009737711764-6eomkq5mcb6t96gvmn1057mfu7fttfg9.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyB2lNJ-QLY_LU7BjFRh8XXopraD8e7tmvE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "1009737711764-6eomkq5mcb6t96gvmn1057mfu7fttfg9.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
