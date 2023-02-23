@@ -8,7 +8,11 @@ const SettingScreen = ({ navigation }) => {
   return (
     <>
       <Appbar.Header mode="center-aligned" style={styles.header}>
-        <Appbar.BackAction onPress={() => {}} />
+        <Appbar.BackAction
+          onPress={() => {
+            navigation.push("MainScreen");
+          }}
+        />
         <Appbar.Content title="Setting" titleStyle={styles.headerTitle} />
       </Appbar.Header>
       <View style={styles.setting_wrapper}>
@@ -58,25 +62,29 @@ const SettingScreen = ({ navigation }) => {
                 />
               </View>
             </TouchableWithoutFeedback>
-            <View style={styles.action_container}>
-              <View style={styles.action_left}>
+            <TouchableWithoutFeedback
+              onPress={() => navigation.push("UpdateFaceScreen")}
+            >
+              <View style={styles.action_container}>
+                <View style={styles.action_left}>
+                  <Avatar.Icon
+                    icon="emoticon-happy-outline"
+                    size={34}
+                    color={Colors.pink}
+                    style={{ backgroundColor: Colors.lighterPink }}
+                  />
+                  <Text style={{ marginLeft: 10, fontSize: 15 }}>
+                    Update face
+                  </Text>
+                </View>
                 <Avatar.Icon
-                  icon="emoticon-happy-outline"
+                  icon="chevron-right"
                   size={34}
-                  color={Colors.pink}
-                  style={{ backgroundColor: Colors.lighterPink }}
+                  color={Colors.darkGray}
+                  style={{ backgroundColor: Colors.lightGray }}
                 />
-                <Text style={{ marginLeft: 10, fontSize: 15 }}>
-                  Update face
-                </Text>
               </View>
-              <Avatar.Icon
-                icon="chevron-right"
-                size={34}
-                color={Colors.darkGray}
-                style={{ backgroundColor: Colors.lightGray }}
-              />
-            </View>
+            </TouchableWithoutFeedback>
           </View>
           <View
             style={{
