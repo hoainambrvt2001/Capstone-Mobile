@@ -2,6 +2,7 @@ import {
   GoogleSignin,
   GoogleSigninButton,
 } from "@react-native-google-signin/google-signin";
+import auth from "@react-native-firebase/auth";
 
 GoogleSignin.configure({
   webClientId:
@@ -9,22 +10,26 @@ GoogleSignin.configure({
 });
 
 const CustomGoogleSignIn = () => {
-  const signIn = async () => {
-    try {
-      await GoogleSignin.hasPlayServices();
-      const userInfo = await GoogleSignin.signIn();
-      console.log({ userInfo });
-    } catch (error) {
-      if (error.code === statusCodes.SIGN_IN_CANCELLED) {
-        // user cancelled the login flow
-      } else if (error.code === statusCodes.IN_PROGRESS) {
-        // operation (e.g. sign in) is in progress already
-      } else if (error.code === statusCodes.PLAY_SERVICES_NOT_AVAILABLE) {
-        // play services not available or outdated
-      } else {
-        // some other error happened
-      }
-    }
+  const onGoogleButtonPress = async () => {
+    // Check if your device supports Google Play
+    await GoogleSignin.hasPlayServices({ showPlayServicesUpdateDialog: true });
+    // Get the users ID token
+    const { idToken } = await GoogleSignin.signIn();
+
+    // Create a Google credential with the token
+    const googleCredential = auth.GoogleAuthProvider.credential(idToken);
+
+    // Sign-in the user with the credential
+    await auth()
+      .signInWithCredential(googleCredential)
+      .then(async (data) => {
+        const token = await data.user.getIdToken();
+        const user = {
+          userId: data.user.uid,
+          token: token,
+        };
+        console.log(user);
+      });
   };
 
   return (
@@ -32,7 +37,7 @@ const CustomGoogleSignIn = () => {
       style={{ width: "100%", borderRadius: 5 }}
       size={GoogleSigninButton.Size.Wide}
       color={GoogleSigninButton.Color.Dark}
-      onPress={signIn}
+      onPress={onGoogleButtonPress}
       // disabled={this.state.isSigninInProgress}
     />
   );

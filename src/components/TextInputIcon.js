@@ -56,5 +56,6 @@ const styles = StyleSheet.create({
     fontSize: 13,
     color: theme.colors.error,
     paddingTop: 8,
+    marginLeft: 16,
   },
 });

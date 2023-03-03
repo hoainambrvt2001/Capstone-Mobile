@@ -4,9 +4,9 @@ import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import Icon from "react-native-vector-icons/Feather";
 import Colors from "../theme/Colors";
 
-import HomeScreen from "../screens/HomeScreen";
-import SettingScreen from "../screens/SettingScreen";
-import AccessHistoryScreen from "../screens/AccessHistoryScreen";
+import HomeScreen from "./HomeScreen";
+import SettingScreen from "./SettingScreen";
+import AccessManagementScreen from "./AccessManagementScreen";
 
 import * as Animatable from "react-native-animatable";
 
@@ -20,10 +20,10 @@ const TabArr = [
     alphaClr: Colors.lighterPink,
   },
   {
-    route: "AccessHistoryScreen",
-    label: "Access History",
+    route: "AccessManagementScreen",
+    label: "Manage Access",
     icon: "search",
-    component: AccessHistoryScreen,
+    component: AccessManagementScreen,
     color: Colors.pink,
     alphaClr: Colors.lighterPink,
   },
@@ -72,10 +72,16 @@ const TabButton = (props) => {
         <View
           style={[
             styles.btn,
-            { backgroundColor: focused ? null : item.alphaClr },
+            {
+              backgroundColor: focused ? null : Colors.white,
+            },
           ]}
         >
-          <Icon name={item.icon} color={focused ? Colors.white : Colors.pink} />
+          <Icon
+            name={item.icon}
+            color={focused ? Colors.white : Colors.darkerGray}
+            size={focused ? 20 : 24}
+          />
           <Animatable.View ref={textViewRef}>
             {focused && (
               <Text

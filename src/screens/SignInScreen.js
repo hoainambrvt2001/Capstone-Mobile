@@ -11,8 +11,13 @@ import Logo from "../components/Logo";
 import Header from "../components/Header";
 import CustomGoogleSignIn from "../components/GoogleSignIn";
 import Colors from "../theme/Colors";
+import auth from "@react-native-firebase/auth";
+import { useDispatch } from "react-redux";
+import { fetchUserData } from "../store/reducers/userSlice";
 
 const SignInScreen = ({ navigation }) => {
+  const dispatch = useDispatch();
+
   const userSchema = Yup.object({
     email: Yup.string()
       .email("It must be a valid email.")
@@ -20,11 +25,24 @@ const SignInScreen = ({ navigation }) => {
     password: Yup.string().required("Password is a required field."),
   });
 
-  const handleSignIn = (values, actions) => {
-    navigation.reset({
-      index: 0,
-      routes: [{ name: "MainScreen" }],
-    });
+  const handleSignIn = async (values, actions) => {
+    await auth()
+      .signInWithEmailAndPassword(values.email, values.password)
+      .then((data) => data.user.getIdTokenResult())
+      .then((idTokenResult) => {
+        const params = {
+          email: values.email,
+          token: idTokenResult.token,
+          expirationTime: idTokenResult.expirationTime,
+        };
+        dispatch(fetchUserData(params));
+      })
+      .catch((error) => {
+        if (error.code === "auth/invalid-email") {
+          console.log("That email address is invalid!");
+        }
+        console.error(error);
+      });
     actions.setSubmitting(false);
   };
 

@@ -5,9 +5,8 @@ import Colors from "../theme/Colors";
 import Fonts from "../theme/Fonts";
 import Icon from "react-native-vector-icons/FontAwesome5";
 
-const AccessHistoryCard = ({
+const AccessKeyCard = ({
   access_hitory_info = {
-    room: "B4-404",
     organization: "HCMUT",
     time: "10:00 02/23/2023",
   },
@@ -16,16 +15,13 @@ const AccessHistoryCard = ({
   return (
     <View style={styles.card_wrapper}>
       <View style={styles.access_icon_wrapper}>
-        <Icon name="walking" style={styles.access_icon} />
+        <Icon name="key" style={styles.access_icon} />
       </View>
       <View style={styles.access_text}>
-        <View style={styles.access_location}>
-          <Text style={styles.access_room}>Action: Check-in</Text>
-          <Text style={styles.access_organization}>
-            At: {room} in {organization}
-          </Text>
-        </View>
-        <Text style={styles.access_time}>{time}</Text>
+        <Text style={styles.access_organization}>
+          Organization: {organization}
+        </Text>
+        <Text style={styles.access_time}>Registered in: {time}</Text>
       </View>
     </View>
   );
@@ -41,6 +37,7 @@ const styles = EStyleSheet.create({
     borderColor: Colors.gray,
     flexDirection: "row",
     maxWidth: 340,
+    width: "100%",
   },
   access_icon_wrapper: {
     width: "50rem",
@@ -56,24 +53,20 @@ const styles = EStyleSheet.create({
   },
   access_text: {
     paddingLeft: "19rem",
-    flexDirection: "row",
   },
-  access_room: {
+  access_organization: {
     lineHeight: "21rem",
     color: Colors.black,
     marginBottom: "5rem",
     fontSize: Fonts.size.normalText,
     fontWeight: "bold",
   },
-  access_organization: {
+  access_time: {
     lineHeight: "18rem",
     color: Colors.darkGray,
     fontSize: Fonts.size.medium,
-    fontWeight: "normal",
-  },
-  access_time: {
-    color: Colors.darkGray,
+    fontWeight: "400",
   },
 });
 
-export default AccessHistoryCard;
+export default AccessKeyCard;

@@ -5,20 +5,21 @@ import AccessHistoryCard from "../components/AccessHistoryCard";
 import Background from "../components/Background";
 import WeatherWidget from "../components/WeatherWidget";
 import Colors from "../theme/Colors";
+import { useSelector } from "react-redux";
+import { format } from "date-fns";
 
 const HomeScreen = () => {
+  const user = useSelector((state) => state.user);
+  const today = format(new Date(), "cccc, do LLL yyyy");
   return (
     <>
       <Appbar.Header style={styles.header}>
         <View style={styles.title_wrapper}>
           <Appbar.Content
-            title="Hello Nam Vo,"
+            title={`Hello, ${user.name}`}
             titleStyle={styles.header_title}
           />
-          <Appbar.Content
-            title="Thursday, 23th Feb 2023"
-            titleStyle={styles.header_subtitle}
-          />
+          <Appbar.Content title={today} titleStyle={styles.header_subtitle} />
         </View>
         <Avatar.Image size={35} source={require("../assets/avatar.jpg")} />
       </Appbar.Header>

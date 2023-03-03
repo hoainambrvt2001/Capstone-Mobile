@@ -10,7 +10,7 @@ const styles = EStyleSheet.create({
     backgroundColor: "#ffffff",
   },
   headerTitle: {
-    fontSize: 20,
+    fontSize: 18,
     fontWeight: "bold",
     alignSelf: "center",
     justifySelf: "center",

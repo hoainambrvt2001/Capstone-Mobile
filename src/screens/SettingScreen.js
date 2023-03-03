@@ -1,10 +1,23 @@
 import React from "react";
 import { StyleSheet, View, TouchableWithoutFeedback } from "react-native";
 import { Text, Avatar, Button, Appbar } from "react-native-paper";
-import Background from "../components/Background";
 import Colors from "../theme/Colors";
+import auth from "@react-native-firebase/auth";
+import { resetUser } from "../store/reducers/userSlice";
+import { useSelector } from "react-redux";
 
 const SettingScreen = ({ navigation }) => {
+  const user = useSelector((state) => state.user);
+
+  const handleSignout = async () => {
+    await auth()
+      .signOut()
+      .then(() => {
+        resetUser();
+        console.log("User signed out!");
+      });
+  };
+
   return (
     <>
       <Appbar.Header mode="center-aligned" style={styles.header}>
@@ -19,8 +32,8 @@ const SettingScreen = ({ navigation }) => {
         <View style={styles.setting_container}>
           <View style={styles.info_wrapper}>
             <Avatar.Image source={require("../assets/avatar.jpg")} size={130} />
-            <Text style={styles.info_name}>Nam Vo</Text>
-            <Text style={styles.info_email}>nam.vo_kaztebrvt@example.com</Text>
+            <Text style={styles.info_name}>{user.name}</Text>
+            <Text style={styles.info_email}>{user.email}</Text>
             <Button
               style={styles.info_edit}
               mode="contained"
@@ -113,9 +126,7 @@ const SettingScreen = ({ navigation }) => {
                 style={{ backgroundColor: Colors.lightGray }}
               />
             </View>
-            <TouchableWithoutFeedback
-              onPress={() => navigation.push("SignInScreen")}
-            >
+            <TouchableWithoutFeedback onPress={handleSignout}>
               <View style={styles.action_container}>
                 <View style={styles.action_left}>
                   <Avatar.Icon
@@ -144,7 +155,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#ffffff",
   },
   headerTitle: {
-    fontSize: 20,
+    fontSize: 18,
     fontWeight: "bold",
     alignSelf: "center",
     justifySelf: "center",

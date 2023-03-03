@@ -1,43 +1,34 @@
 import React, { useState } from "react";
-import { StyleSheet, View, TouchableOpacity, ScrollView } from "react-native";
-import { Avatar, Button, Appbar } from "react-native-paper";
+import { StyleSheet, View, ScrollView } from "react-native";
+import { Text, Button, Appbar } from "react-native-paper";
 import Colors from "../theme/Colors";
-import * as ImagePicker from "expo-image-picker";
 import TextInputIcon from "../components/TextInputIcon";
 import { Formik } from "formik";
 import * as Yup from "yup";
-import { useSelector } from "react-redux";
 
-const EditProfileScreen = ({ navigation }) => {
-  const user = useSelector((state) => state.user);
-  const [userAvatar, setUserAvatar] = useState({
-    isChanged: false,
-    uri: "",
+const RequestAdminScreen = ({ navigation }) => {
+  const [requestInfo, setRequestInfo] = useState({
+    fullname: "Nam Vo",
+    email: "nam.vo_katzebrvt@example.com",
+    phone: "0437320589",
+    organization: "",
+    note: "",
   });
-  const userInfoSchema = Yup.object({
-    name: Yup.string().required("Full name is a required field."),
+
+  const requestInfoSchema = Yup.object({
+    fullname: Yup.string().required("Full name is a required field."),
     email: Yup.string().email().required("Email is a required field."),
-    phone: Yup.number(),
+    phone: Yup.number().required("Contact is a required field."),
+    // TODO: Need to validate before request
+    organization: Yup.string().required("Organization is a required field."),
+    note: Yup.string(),
   });
-  const pickImage = async () => {
-    let result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.All,
-      allowsEditing: true,
-      aspect: [4, 3],
-      quality: 1,
-    });
 
-    if (!result.canceled) {
-      setUserAvatar({
-        isChanged: true,
-        uri: result.assets[0].uri,
-      });
-    }
-  };
-  const handleEditProfile = (values, actions) => {
+  const handleSendRequest = (values, actions) => {
     actions.setSubmitting(false);
     navigation.goBack();
   };
+
   return (
     <>
       <Appbar.Header mode="center-aligned" style={styles.header}>
@@ -46,23 +37,22 @@ const EditProfileScreen = ({ navigation }) => {
             navigation.goBack();
           }}
         />
-        <Appbar.Content title="Edit Profile" titleStyle={styles.headerTitle} />
+        <Appbar.Content
+          title="Register Access Form"
+          titleStyle={styles.headerTitle}
+        />
       </Appbar.Header>
       <ScrollView style={styles.wrapper}>
         <View style={styles.container}>
           <Formik
-            initialValues={{
-              name: user.name,
-              email: user.email,
-              phone: user.phone,
-            }}
+            initialValues={requestInfo}
             enableReinitialize={true}
             initialTouched={{
               name: false,
             }}
-            validationSchema={userInfoSchema}
+            validationSchema={requestInfoSchema}
             onSubmit={(values, actions) => {
-              handleEditProfile(values, actions);
+              handleSendRequest(values, actions);
             }}
           >
             {({
@@ -77,31 +67,35 @@ const EditProfileScreen = ({ navigation }) => {
             }) => {
               return (
                 <>
-                  <TouchableOpacity activeOpacity={0.6} onPress={pickImage}>
-                    <View>
-                      <Avatar.Image
-                        source={require("../assets/avatar.jpg")}
-                        size={130}
-                      />
-                      <Avatar.Icon
-                        size={32}
-                        icon="pencil"
-                        style={styles.avatar_edit}
-                        color={Colors.white}
-                        backgroundColor={Colors.pink}
-                      />
-                    </View>
-                  </TouchableOpacity>
-                  <View style={styles.box}></View>
+                  <View>
+                    <Text>
+                      <Text style={{ color: Colors.pink, fontWeight: "bold" }}>
+                        Note:{" "}
+                      </Text>{" "}
+                      Make sure that your organization has been registered.
+                    </Text>
+                  </View>
+                  <TextInputIcon
+                    value={values.organization}
+                    inputLablel={"Organization"}
+                    onChangeText={handleChange("organization")}
+                    onBlur={handleBlur("organization")}
+                    iconName="domain"
+                    returnKeyType="next"
+                    errorText={errors.organization}
+                    error={
+                      touched.organization && errors.organization !== undefined
+                    }
+                  />
                   <TextInputIcon
                     value={values.name}
                     inputLablel={"Fullname"}
-                    onChangeText={handleChange("name")}
-                    onBlur={handleBlur("name")}
+                    onChangeText={handleChange("fullname")}
+                    onBlur={handleBlur("fullname")}
                     iconName="account-outline"
                     returnKeyType="next"
-                    errorText={errors.name}
-                    error={touched.name && errors.name !== undefined}
+                    errorText={errors.fullname}
+                    error={touched.fullname && errors.fullname !== undefined}
                   />
                   <TextInputIcon
                     value={values.email}
@@ -119,7 +113,7 @@ const EditProfileScreen = ({ navigation }) => {
                   />
                   <TextInputIcon
                     value={values.phone}
-                    inputLablel={"Phone"}
+                    inputLablel={"Contact"}
                     onChangeText={handleChange("phone")}
                     onBlur={handleBlur("phone")}
                     iconName="phone-outline"
@@ -127,12 +121,25 @@ const EditProfileScreen = ({ navigation }) => {
                     errorText={errors.phone}
                     error={touched.phone && errors.phone !== undefined}
                   />
+
+                  <TextInputIcon
+                    value={values.note}
+                    inputLablel={"Note"}
+                    onChangeText={handleChange("note")}
+                    onBlur={handleBlur("note")}
+                    iconName="note-edit-outline"
+                    returnKeyType="next"
+                    errorText={errors.note}
+                    error={touched.note && errors.note !== undefined}
+                    multiline={true}
+                    numberOfLines={5}
+                  />
                   <Button
                     mode="contained"
                     onPress={handleSubmit}
                     style={styles.save_edit_btn}
                   >
-                    Edit Profile
+                    Send request
                   </Button>
                 </>
               );
@@ -152,7 +159,7 @@ const styles = StyleSheet.create({
   },
   container: {
     flex: 1,
-    padding: 20,
+    paddingHorizontal: 20,
     width: "100%",
     maxWidth: 340,
     alignSelf: "center",
@@ -176,13 +183,6 @@ const styles = StyleSheet.create({
   box: {
     marginVertical: 10,
   },
-  select_date_btn: {
-    borderWidth: 1,
-    borderRadius: 5,
-    borderColor: Colors.opacityDarkGray,
-    color: Colors.darkGray,
-    width: "100%",
-  },
   save_edit_btn: {
     backgroundColor: Colors.pink,
     width: "100%",
@@ -190,4 +190,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default EditProfileScreen;
+export default RequestAdminScreen;

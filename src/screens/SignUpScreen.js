@@ -11,10 +11,15 @@ import TextInput from "../components/TextInput";
 import BackButton from "../components/BackButton";
 import { theme } from "../theme/theme";
 import Colors from "../theme/Colors";
+import auth from "@react-native-firebase/auth";
+import { createUserData } from "../store/reducers/userSlice";
+import { useDispatch } from "react-redux";
 
 const SignUpScreen = ({ navigation }) => {
+  const dispatch = useDispatch();
+
   const userSchema = Yup.object({
-    name: Yup.string().required("Username is a required field."),
+    name: Yup.string().required("Name is a required field."),
     email: Yup.string()
       .email("It must be a valid email.")
       .required("Email is a required field."),
@@ -30,10 +35,28 @@ const SignUpScreen = ({ navigation }) => {
   });
 
   const handleSignUp = async (values, actions) => {
-    navigation.reset({
-      index: 0,
-      routes: [{ name: "MainScreen" }],
-    });
+    await auth()
+      .createUserWithEmailAndPassword(values.email, values.password)
+      .then((data) => data.user.getIdTokenResult())
+      .then((idTokenResult) => {
+        const params = {
+          name: values.name,
+          email: values.email,
+          password: values.password,
+          token: idTokenResult.token,
+          expirationTime: idTokenResult.expirationTime,
+        };
+        dispatch(createUserData(params));
+      })
+      .catch((error) => {
+        if (error.code === "auth/email-already-in-use") {
+          console.log("That email address is already in use!");
+        }
+        if (error.code === "auth/invalid-email") {
+          console.log("That email address is invalid!");
+        }
+        console.error(error);
+      });
     actions.setSubmitting(false);
   };
 

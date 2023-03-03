@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from "react";
 import { TouchableOpacity, View, Image, Linking, Text } from "react-native";
 import { Appbar } from "react-native-paper";
 import { Camera, useCameraDevices } from "react-native-vision-camera";
+import Background from "../../components/Background";
 import Colors from "../../theme/Colors";
 
 import styles from "./Styles";
@@ -33,14 +34,6 @@ function CameraScreen({ navigation }) {
     }
   };
 
-  // const takePicture = async () => {
-  //   if (cameraRef) {
-  //     const options = { quality: 0.5, base64: true };
-  //     const data = await cameraRef.current.takePictureAsync(options);
-  //     console.log(data.uri);
-  //   }
-  // };
-
   useEffect(() => {
     async function getPermission() {
       const permission = await Camera.requestCameraPermission();
@@ -49,14 +42,6 @@ function CameraScreen({ navigation }) {
     }
     getPermission();
   }, []);
-
-  if (!device) {
-    return (
-      <View>
-        <Text>Camera not available</Text>
-      </View>
-    );
-  }
 
   return (
     <>
@@ -68,53 +53,61 @@ function CameraScreen({ navigation }) {
         />
         <Appbar.Content title="Update face" titleStyle={styles.headerTitle} />
       </Appbar.Header>
-      <View style={styles.component_wrapper}>
-        <View style={styles.component_container}>
-          <View style={styles.cameraContent}>
-            <Camera
-              style={styles.preview}
-              ref={cameraRef}
-              device={device}
-              photo={true}
-              isActive={true}
-            />
-            <Image
-              source={require("../../assets/photoScanRingIcon.png")}
-              resizeMode="contain"
-              style={styles.photoScanRingIcon}
-            />
-            <View style={styles.frontIdContainer}>
-              <Text style={styles.frontIdHeading}>Front of ID</Text>
-              <Text style={styles.frontIdPeregraph}>
-                Fit the front of your ID within the frame - check for good
-                lighting.
-              </Text>
-              <View style={styles.clickPhotoBtnContent}>
-                <TouchableOpacity
-                  style={styles.clickPhotoBtn}
-                  onPress={takePicture.bind(this)}
-                />
+      {device ? (
+        <View style={styles.component_wrapper}>
+          <View style={styles.component_container}>
+            <View style={styles.cameraContent}>
+              <Camera
+                style={styles.preview}
+                ref={cameraRef}
+                device={device}
+                photo={true}
+                isActive={true}
+              />
+              <Image
+                source={require("../../assets/photoScanRingIcon.png")}
+                resizeMode="contain"
+                style={styles.photoScanRingIcon}
+              />
+              <View style={styles.frontIdContainer}>
+                <Text style={styles.frontIdHeading}>Front of ID</Text>
+                <Text style={styles.frontIdPeregraph}>
+                  Fit the front of your ID within the frame - check for good
+                  lighting.
+                </Text>
+                <View style={styles.clickPhotoBtnContent}>
+                  <TouchableOpacity
+                    style={styles.clickPhotoBtn}
+                    onPress={takePicture.bind(this)}
+                  />
+                </View>
               </View>
             </View>
-          </View>
-          <View style={styles.flashOnOfBtnContent}>
-            <TouchableOpacity
-              style={styles.flashOnOfBtn}
-              onPress={() => setFlashModeOn(!flashModeOn)}
-            >
-              <Image
-                source={
-                  flashModeOn
-                    ? require("../../assets/FlashOn.png")
-                    : require("../../assets/FlashOff.png")
-                }
-                resizeMode="contain"
-                style={styles.flashOnOffImg}
-              />
-            </TouchableOpacity>
+            <View style={styles.flashOnOfBtnContent}>
+              <TouchableOpacity
+                style={styles.flashOnOfBtn}
+                onPress={() => setFlashModeOn(!flashModeOn)}
+              >
+                <Image
+                  source={
+                    flashModeOn
+                      ? require("../../assets/FlashOn.png")
+                      : require("../../assets/FlashOff.png")
+                  }
+                  resizeMode="contain"
+                  style={styles.flashOnOffImg}
+                />
+              </TouchableOpacity>
+            </View>
           </View>
         </View>
-      </View>
+      ) : (
+        <Background>
+          <View>
+            <Text>Sorry, your camera is not available now!</Text>
+          </View>
+        </Background>
+      )}
     </>
   );
 }
