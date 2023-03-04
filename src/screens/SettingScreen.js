@@ -13,7 +13,7 @@ const SettingScreen = ({ navigation }) => {
     await auth()
       .signOut()
       .then(() => {
-        resetUser();
+        if (user) resetUser(); // handle reset global state
         console.log("User signed out!");
       });
   };

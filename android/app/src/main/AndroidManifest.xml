@@ -12,7 +12,7 @@
   <!-- END OPTIONAL PERMISSIONS -->
 
   <queries>
-    <!-- Support checking for http(s) links via the Linking API -->
+    <!-- Support checking for http(s) links via the Linking API --> 
     <intent>
       <action android:name="android.intent.action.VIEW" />
       <category android:name="android.intent.category.BROWSABLE" />

@@ -15,7 +15,11 @@ import {
   RequestAdminScreen,
 } from "./src/screens";
 import auth from "@react-native-firebase/auth";
-import { Provider as StoreProvider } from "react-redux";
+import {
+  // useSelector,
+  // useDispatch,
+  Provider as StoreProvider,
+} from "react-redux";
 import store from "./src/store";
 
 const Stack = createNativeStackNavigator();
@@ -30,10 +34,10 @@ export default function App() {
   const [pending, setPending] = useState(true);
 
   // Handle user state changes
-  function onAuthStateChanged(user) {
+  const onAuthStateChanged = (user) => {
     setCurrentUser(user);
     if (pending) setPending(false);
-  }
+  };
 
   useEffect(() => {
     const subscriber = auth().onAuthStateChanged(onAuthStateChanged);

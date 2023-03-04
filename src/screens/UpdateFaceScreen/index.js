@@ -2,45 +2,54 @@ import React, { useState, useEffect, useRef } from "react";
 import { TouchableOpacity, View, Image, Linking, Text } from "react-native";
 import { Appbar } from "react-native-paper";
 import { Camera, useCameraDevices } from "react-native-vision-camera";
+import { useSelector } from "react-redux";
 import Background from "../../components/Background";
+import { uploadImageToTrain } from "../../firebase";
 import Colors from "../../theme/Colors";
-
 import styles from "./Styles";
 
 function CameraScreen({ navigation }) {
-  const [flashModeOn, setFlashModeOn] = useState(false);
   const cameraRef = useRef(null);
   const devices = useCameraDevices();
   const device = devices.back;
-  const [imgSrc, setImgSrc] = useState("");
+  const [flashModeOn, setFlashModeOn] = useState(false);
+  const [faceImgSrc, setFaceImgSrc] = useState("");
+  const currentUser = useSelector((state) => state.user);
 
   const takePicture = async () => {
-    console.log("Hello");
-    console.log(cameraRef.current !== null);
     try {
       if (cameraRef.current !== null) {
         const options = {
-          flash: flashModeOn ? "on" : "off",
+          quality: 100,
+          skipMetadata: true,
         };
-        console.log("Hi");
-        const photo = await cameraRef.current.takePhoto(options);
-        // setImgSrc(photo.path);
-        console.log(photo.path);
+        if (device.hasFlash) {
+          options.flash = flashModeOn ? "on" : "off";
+        }
+        const photo = await cameraRef.current.takeSnapshot(options);
+        const photoPath = "file://" + photo.path;
+        uploadImageToTrain(photoPath, currentUser.id);
+        console.log(photoPath);
+        setFaceImgSrc(photoPath);
       } else {
-        console.log("None");
+        console.log("No camera is available.");
       }
     } catch (error) {
       console.log(error);
+      console.log("Failed to capture face!");
     }
   };
 
   useEffect(() => {
-    async function getPermission() {
-      const permission = await Camera.requestCameraPermission();
-      console.log(`Camera permission status: ${permission}`);
-      if (permission == "denied") await Linking.openSettings();
-    }
-    getPermission();
+    const getCameraPermission = async () => {
+      const permission = await Camera.getCameraPermissionStatus();
+      if (permission == "denied") {
+        const requestPermission = await Camera.requestCameraPermission();
+        console.log(`Camera permission status: ${requestPermission}`);
+        if (requestPermission == "denied") await Linking.openSettings();
+      }
+    };
+    getCameraPermission();
   }, []);
 
   return (
@@ -100,6 +109,12 @@ function CameraScreen({ navigation }) {
               </TouchableOpacity>
             </View>
           </View>
+          {/* <Image
+            source={
+              imgSrc ? { uri: imgSrc } : require("../../assets/avatar.jpg")
+            }
+            style={{ width: "100%", height: "30%" }}
+          /> */}
         </View>
       ) : (
         <Background>
