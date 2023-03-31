@@ -1,21 +1,19 @@
-import React from "react";
+import React, { useContext } from "react";
 import { StyleSheet, View, TouchableWithoutFeedback } from "react-native";
 import { Text, Avatar, Button, Appbar } from "react-native-paper";
 import Colors from "../theme/Colors";
-import auth from "@react-native-firebase/auth";
+import { useDispatch, useSelector } from "react-redux";
 import { resetUser } from "../store/reducers/userSlice";
-import { useSelector } from "react-redux";
+import { AuthContext } from "../auth";
 
 const SettingScreen = ({ navigation }) => {
+  const dispatch = useDispatch();
   const user = useSelector((state) => state.user);
+  const { signOut } = useContext(AuthContext);
 
   const handleSignout = async () => {
-    await auth()
-      .signOut()
-      .then(() => {
-        if (user) resetUser(); // handle reset global state
-        console.log("User signed out!");
-      });
+    await signOut();
+    dispatch(resetUser());
   };
 
   return (

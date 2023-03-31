@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React from "react";
 import { StyleSheet, View, TouchableOpacity, ScrollView } from "react-native";
 import { Avatar, Button, Appbar } from "react-native-paper";
 import Colors from "../theme/Colors";
@@ -13,8 +13,8 @@ import { setNotification } from "../store/reducers/notificationSlice";
 
 const EditProfileScreen = ({ navigation }) => {
   const dispatch = useDispatch();
-
   const user = useSelector((state) => state.user);
+
   const userInfoSchema = Yup.object({
     name: Yup.string().required("Full name is a required field."),
     email: Yup.string().email().required("Email is a required field."),
@@ -33,14 +33,16 @@ const EditProfileScreen = ({ navigation }) => {
     }
   };
   const handleEditProfile = async (values, actions) => {
-    let photo_url = "";
+    let photoUrl = "";
+    let photoName = "";
     if (values.photo_url !== user.photoURL) {
-      photo_url = await uploadAvatarImage(values.photo_url, user.uid);
+      photoName = `${user.uid}.jpg`;
+      photoUrl = await uploadAvatarImage(values.photo_url, photoName);
     }
     dispatch(
       updateUserById({
         id: user.uid,
-        photo_url: photo_url,
+        photo_url: photoUrl,
         name: values.name,
         phone_number: values.phone_number,
       })

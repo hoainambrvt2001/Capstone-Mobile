@@ -20,7 +20,7 @@ import Colors from "../../theme/Colors";
 
 function CameraScreen({ navigation }) {
   const dispatch = useDispatch();
-  const currentUser = useSelector((state) => state.user);
+  const currUser = useSelector((state) => state.user);
   const devices = useCameraDevices();
   const device = devices.back;
   const cameraRef = useRef(null);
@@ -43,14 +43,28 @@ function CameraScreen({ navigation }) {
         }
         const photo = await cameraRef.current.takeSnapshot(options);
         const photoPath = "file://" + photo.path;
-        const result = await uploadImageToTrain(photoPath, currentUser);
+        let photoName;
+        if (currUser.registeredFaces.length === 2) {
+          photoName = `${currUser.uid}-0.jpg`;
+        } else {
+          photoName = `${currUser.uid}-${currUser.registeredFaces.length}.jpg`;
+        }
+        const result = await uploadImageToTrain(photoPath, photoName);
         if (result) {
-          dispatch(
-            updateUserById({
-              id: currentUser.uid,
-              number_face_images: currentUser.numberFaceImages + 1,
-            })
+          const newRegisteredFaces = currUser.registeredFaces.map(
+            (item) => item
           );
+          newRegisteredFaces.push({
+            name: photoName,
+            url: result,
+          }),
+            dispatch(
+              updateUserById({
+                token: currUser.token,
+                id: currUser.uid,
+                registered_faces: newRegisteredFaces,
+              })
+            );
           dispatch(setNotification("Update face successfully!"));
           navigation.goBack();
         }
@@ -118,7 +132,7 @@ function CameraScreen({ navigation }) {
                   photo={true}
                   isActive={true}
                   frameProcessor={frameProcessor}
-                  frameProcessorFps={5}
+                  frameProcessorFps={10}
                   orientation={"landscapeRight"}
                 />
                 <Image

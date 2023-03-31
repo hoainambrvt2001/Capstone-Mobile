@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useContext } from "react";
 import { Formik } from "formik";
 import * as Yup from "yup";
 import { View, StyleSheet, TouchableOpacity } from "react-native";
@@ -11,12 +11,14 @@ import Logo from "../components/Logo";
 import Header from "../components/Header";
 import CustomGoogleSignIn from "../components/GoogleSignIn";
 import Colors from "../theme/Colors";
-import auth from "@react-native-firebase/auth";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { signInByEmailAndPassword } from "../store/reducers/userSlice";
+import { AuthContext } from "../auth";
 
 const SignInScreen = ({ navigation }) => {
   const dispatch = useDispatch();
+  const user = useSelector((state) => state.user);
+  const { signIn } = useContext(AuthContext);
 
   const userSchema = Yup.object({
     email: Yup.string()
@@ -26,23 +28,15 @@ const SignInScreen = ({ navigation }) => {
   });
 
   const handleSignIn = async (values, actions) => {
-    await auth()
-      .signInWithEmailAndPassword(values.email, values.password)
-      .then((data) => data.user.getIdTokenResult())
-      .then((idTokenResult) => {
-        const params = {
-          email: values.email,
-          token: idTokenResult.token,
-          expirationTime: idTokenResult.expirationTime,
-        };
-        dispatch(signInByEmailAndPassword(params));
-      })
-      .catch((error) => {
-        if (error.code === "auth/invalid-email") {
-          console.log("That email address is invalid!");
-        }
-        console.error(error);
-      });
+    const params = {
+      email: values.email,
+      password: values.password,
+    };
+    dispatch(signInByEmailAndPassword(params));
+    signIn({
+      token: user.token,
+      token_expiration_time: user.tokenExpirationTime,
+    });
     actions.setSubmitting(false);
   };
 

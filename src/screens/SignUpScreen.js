@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useContext } from "react";
 import { Formik } from "formik";
 import * as Yup from "yup";
 import { View, StyleSheet, TouchableOpacity } from "react-native";
@@ -9,14 +9,15 @@ import Header from "../components/Header";
 import Button from "../components/Button";
 import TextInput from "../components/TextInput";
 import BackButton from "../components/BackButton";
-import { theme } from "../theme/theme";
 import Colors from "../theme/Colors";
-import auth from "@react-native-firebase/auth";
 import { createUserByEmailAndPassword } from "../store/reducers/userSlice";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
+import { AuthContext } from "../auth";
 
 const SignUpScreen = ({ navigation }) => {
   const dispatch = useDispatch();
+  const user = useSelector((state) => state.user);
+  const { signUp } = useContext(AuthContext);
 
   const userSchema = Yup.object({
     name: Yup.string().required("Name is a required field."),
@@ -35,28 +36,16 @@ const SignUpScreen = ({ navigation }) => {
   });
 
   const handleSignUp = async (values, actions) => {
-    await auth()
-      .createUserWithEmailAndPassword(values.email, values.password)
-      .then((data) => data.user.getIdTokenResult())
-      .then((idTokenResult) => {
-        const params = {
-          name: values.name,
-          email: values.email,
-          password: values.password,
-          token: idTokenResult.token,
-          expirationTime: idTokenResult.expirationTime,
-        };
-        dispatch(createUserByEmailAndPassword(params));
-      })
-      .catch((error) => {
-        if (error.code === "auth/email-already-in-use") {
-          console.log("That email address is already in use!");
-        }
-        if (error.code === "auth/invalid-email") {
-          console.log("That email address is invalid!");
-        }
-        console.error(error);
-      });
+    const params = {
+      name: values.name,
+      email: values.email,
+      password: values.password,
+    };
+    dispatch(createUserByEmailAndPassword(params));
+    signUp({
+      token: user.token,
+      token_expiration_time: user.tokenExpirationTime,
+    });
     actions.setSubmitting(false);
   };
 

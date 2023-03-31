@@ -1,48 +1,48 @@
 import { axiosClient, axiosClientWeather } from "./axiosClient";
 
-export const createUserWithEmailAndPassword = async (user) => {
-  const registeredUser = {
-    name: user.name,
-    email: user.email,
-    password: user.password,
+export const createUserWithEmailAndPassword = async (params) => {
+  const bodyData = {
+    name: params.name,
+    email: params.email,
+    password: params.password,
   };
   return await axiosClient
-    .post("auth/signup", registeredUser)
+    .post("auth/signup", bodyData)
     .then((res) => res.data)
-    .then((data) => data.data);
+    .catch((e) => console.log(e));
 };
 
-export const signInWithEmailAndPassword = async (user) => {
-  const signInUser = {
-    email: user.email,
-    password: user.password,
+export const signInWithEmailAndPassword = async (params) => {
+  const bodyData = {
+    email: params.email,
+    password: params.password,
   };
-
+  console.log(bodyData);
   return await axiosClient
-    .post("auth/signin", signInUser)
+    .post("auth/login", bodyData)
     .then((res) => res.data)
-    .then((data) => data.data);
+    .catch((e) => console.log(e.message));
 };
 
-export const signInWithGoogle = async (user) => {
+export const fetchUserWithId = async (params) => {
+  const { id } = params;
   return await axiosClient
-    .post("auth/signin/google", user)
+    .get(`user/${id}`)
     .then((res) => res.data)
-    .then((data) => data.data);
+    .catch((e) => console.log(e));
 };
 
-export const fetchUserWithEmail = async (email) => {
+export const updateUserWithId = async (params) => {
+  const { id, token, updateData } = params;
+  const config = {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  };
   return await axiosClient
-    .get(`user/email/${email}`)
+    .patch(`user/${id}`, updateData, config)
     .then((res) => res.data)
-    .then((data) => data.data);
-};
-
-export const updateUserWithId = async (updateData, userId) => {
-  return await axiosClient
-    .patch(`user/${userId}`, updateData)
-    .then((res) => res.data)
-    .then((data) => data.data);
+    .catch((e) => console.log(e));
 };
 
 export const fetchWeatherData = async (location) => {

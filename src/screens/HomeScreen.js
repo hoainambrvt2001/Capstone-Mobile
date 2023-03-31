@@ -33,8 +33,8 @@ const HomeScreen = () => {
   useEffect(() => {
     const getWeatherData = async (location) => {
       if (location && !weatherData) {
-        const fetchData = await fetchWeatherData(location.coords);
-        setWeatherData(fetchData);
+        // const fetchData = await fetchWeatherData(location.coords);
+        // setWeatherData(fetchData);
       }
     };
     getWeatherData(location);
