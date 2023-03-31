@@ -31,7 +31,14 @@ const SettingScreen = ({ navigation }) => {
       <View style={styles.setting_wrapper}>
         <View style={styles.setting_container}>
           <View style={styles.info_wrapper}>
-            <Avatar.Image source={require("../assets/avatar.jpg")} size={130} />
+            <Avatar.Image
+              source={
+                user.photoURL
+                  ? { uri: user.photoURL }
+                  : require("../assets/avatar.jpg")
+              }
+              size={130}
+            />
             <Text style={styles.info_name}>{user.name}</Text>
             <Text style={styles.info_email}>{user.email}</Text>
             <Button
@@ -61,7 +68,7 @@ const SettingScreen = ({ navigation }) => {
                     icon="lock-reset"
                     size={34}
                     color={Colors.pink}
-                    style={{ backgroundColor: Colors.lighterPink }}
+                    style={styles.prefix_icon}
                   />
                   <Text style={{ marginLeft: 10, fontSize: 15 }}>
                     Reset password
@@ -84,7 +91,7 @@ const SettingScreen = ({ navigation }) => {
                     icon="emoticon-happy-outline"
                     size={34}
                     color={Colors.pink}
-                    style={{ backgroundColor: Colors.lighterPink }}
+                    style={styles.prefix_icon}
                   />
                   <Text style={{ marginLeft: 10, fontSize: 15 }}>
                     Update face
@@ -115,7 +122,7 @@ const SettingScreen = ({ navigation }) => {
                   icon="phone"
                   size={34}
                   color={Colors.pink}
-                  style={{ backgroundColor: Colors.lighterPink }}
+                  style={styles.prefix_icon}
                 />
                 <Text style={{ marginLeft: 10, fontSize: 15 }}>Contact us</Text>
               </View>
@@ -203,6 +210,17 @@ const styles = StyleSheet.create({
   action_left: {
     flexDirection: "row",
     alignItems: "center",
+  },
+  prefix_icon: {
+    backgroundColor: Colors.white,
+    shadowColor: Colors.black,
+    shadowOffset: {
+      width: 0,
+      height: 1,
+    },
+    shadowOpacity: 0.18,
+    shadowRadius: 1.0,
+    elevation: 2,
   },
 });
 

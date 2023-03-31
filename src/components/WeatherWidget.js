@@ -1,45 +1,57 @@
 import React from "react";
 import { StyleSheet, View, Image } from "react-native";
-import { Avatar, Card, Text } from "react-native-paper";
+import { Text } from "react-native-paper";
 import Colors from "../theme/Colors";
-import Fonts from "../theme/Fonts";
 
-const WeatherWidget = () => {
+const WeatherWidget = ({ weatherData }) => {
+  let renderData = weatherData;
+  if (!renderData) {
+    renderData = {
+      temp: 32,
+      humidity: 32,
+      windSpeed: 15,
+      locationName: "Ho Chi Minh City",
+      country: "VN",
+      iconUri: {
+        uri: "https://openweathermap.org/img/wn/10d@2x.png",
+      },
+      cloudiness: 0,
+    };
+  }
   return (
     <View style={styles.card_wrapper}>
       <View style={styles.card_container}>
         <View style={styles.image_wrapper}>
-          <Image
-            source={require("../assets/sun_clouds.png")}
-            style={styles.image}
-          />
+          <Image source={renderData.iconUri} style={styles.image} />
         </View>
         <View style={styles.temp_wrapper}>
-          <Text style={styles.temp_number}>32</Text>
+          <Text style={styles.temp_number}>{renderData.temp}</Text>
           <Text style={styles.temp_unit}>o</Text>
         </View>
         <View style={styles.location_wrapper}>
-          <Text style={styles.location_text}>Ho Chi Minh</Text>
+          <Text style={styles.location_text}>
+            {renderData.locationName}, {renderData.country}
+          </Text>
         </View>
         <View style={styles.detail_wrapper}>
           <View style={styles.detail_card}>
             <Text style={styles.detail_title}>Wind now</Text>
             <View style={styles.detail_content}>
-              <Text style={styles.detail_number}>15</Text>
+              <Text style={styles.detail_number}>{renderData.windSpeed}</Text>
               <Text style={styles.detail_unit}>km</Text>
             </View>
           </View>
           <View style={styles.detail_card}>
             <Text style={styles.detail_title}>Humidity</Text>
             <View style={styles.detail_content}>
-              <Text style={styles.detail_number}>32</Text>
+              <Text style={styles.detail_number}>{renderData.humidity}</Text>
               <Text style={styles.detail_unit}>%</Text>
             </View>
           </View>
           <View style={styles.detail_card}>
-            <Text style={styles.detail_title}>Precipitation</Text>
+            <Text style={styles.detail_title}>Cloudiness</Text>
             <View style={styles.detail_content}>
-              <Text style={styles.detail_number}>87</Text>
+              <Text style={styles.detail_number}>{renderData.cloudiness}</Text>
               <Text style={styles.detail_unit}>%</Text>
             </View>
           </View>
@@ -61,19 +73,18 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   image_wrapper: {
-    width: "100%",
     alignItems: "center",
-    marginLeft: 50,
-    marginTop: -20,
+    justifyContent: "center",
+    marginTop: -40,
   },
   image: {
-    width: 230,
+    width: 200,
     height: 200,
   },
   temp_wrapper: {
     flexDirection: "row",
     alignItems: "flex-start",
-    marginTop: -5,
+    marginTop: -30,
   },
   temp_number: {
     fontWeight: "bold",

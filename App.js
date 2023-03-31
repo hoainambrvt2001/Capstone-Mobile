@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Dimensions } from "react-native";
+import { Dimensions, View } from "react-native";
 import EStyleSheet from "react-native-extended-stylesheet";
 import { NavigationContainer } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
@@ -15,12 +15,9 @@ import {
   RequestAdminScreen,
 } from "./src/screens";
 import auth from "@react-native-firebase/auth";
-import {
-  // useSelector,
-  // useDispatch,
-  Provider as StoreProvider,
-} from "react-redux";
+import { Provider as StoreProvider } from "react-redux";
 import store from "./src/store";
+import NotificationMessage from "./src/components/NotificationMessage";
 
 const Stack = createNativeStackNavigator();
 
@@ -84,6 +81,9 @@ export default function App() {
             />
           </Stack.Navigator>
         </NavigationContainer>
+        <View>
+          <NotificationMessage />
+        </View>
       </Provider>
     </StoreProvider>
   );

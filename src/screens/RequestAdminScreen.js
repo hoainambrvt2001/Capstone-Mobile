@@ -5,30 +5,30 @@ import Colors from "../theme/Colors";
 import TextInputIcon from "../components/TextInputIcon";
 import { Formik } from "formik";
 import * as Yup from "yup";
+import { useSelector } from "react-redux";
 
 const RequestAdminScreen = ({ navigation }) => {
-  const [requestInfo, setRequestInfo] = useState({
-    fullname: "Nam Vo",
-    email: "nam.vo_katzebrvt@example.com",
-    phone: "0437320589",
+  const user = useSelector((state) => state.user);
+  const initRequestInfo = {
+    name: user.name,
+    email: user.email,
+    phone_number: user.phoneNumber ? user.phoneNumber : "",
     organization: "",
     note: "",
-  });
-
+  };
   const requestInfoSchema = Yup.object({
-    fullname: Yup.string().required("Full name is a required field."),
+    name: Yup.string().required("Full name is a required field."),
     email: Yup.string().email().required("Email is a required field."),
-    phone: Yup.number().required("Contact is a required field."),
+    phone_number: Yup.string().required("Contact is a required field."),
     // TODO: Need to validate before request
     organization: Yup.string().required("Organization is a required field."),
     note: Yup.string(),
   });
-
   const handleSendRequest = (values, actions) => {
     actions.setSubmitting(false);
+    console.log(values);
     navigation.goBack();
   };
-
   return (
     <>
       <Appbar.Header mode="center-aligned" style={styles.header}>
@@ -45,10 +45,11 @@ const RequestAdminScreen = ({ navigation }) => {
       <ScrollView style={styles.wrapper}>
         <View style={styles.container}>
           <Formik
-            initialValues={requestInfo}
+            initialValues={initRequestInfo}
             enableReinitialize={true}
             initialTouched={{
-              name: false,
+              organization: false,
+              phone_number: false,
             }}
             validationSchema={requestInfoSchema}
             onSubmit={(values, actions) => {
@@ -68,34 +69,24 @@ const RequestAdminScreen = ({ navigation }) => {
               return (
                 <>
                   <View>
-                    <Text>
+                    <Text style={{ marginBottom: 15 }}>
                       <Text style={{ color: Colors.pink, fontWeight: "bold" }}>
                         Note:{" "}
                       </Text>{" "}
                       Make sure that your organization has been registered.
                     </Text>
                   </View>
-                  <TextInputIcon
-                    value={values.organization}
-                    inputLablel={"Organization"}
-                    onChangeText={handleChange("organization")}
-                    onBlur={handleBlur("organization")}
-                    iconName="domain"
-                    returnKeyType="next"
-                    errorText={errors.organization}
-                    error={
-                      touched.organization && errors.organization !== undefined
-                    }
-                  />
+
                   <TextInputIcon
                     value={values.name}
-                    inputLablel={"Fullname"}
+                    inputLablel={"Name"}
                     onChangeText={handleChange("fullname")}
                     onBlur={handleBlur("fullname")}
                     iconName="account-outline"
                     returnKeyType="next"
-                    errorText={errors.fullname}
-                    error={touched.fullname && errors.fullname !== undefined}
+                    disabled={true}
+                    errorText={errors.name}
+                    error={touched.name && errors.name !== undefined}
                   />
                   <TextInputIcon
                     value={values.email}
@@ -108,20 +99,35 @@ const RequestAdminScreen = ({ navigation }) => {
                     textContentType="emailAddress"
                     keyboardType="email-address"
                     returnKeyType="next"
+                    disabled={true}
                     errorText={errors.email}
                     error={touched.email && errors.email !== undefined}
                   />
                   <TextInputIcon
-                    value={values.phone}
+                    value={values.phone_number}
                     inputLablel={"Contact"}
                     onChangeText={handleChange("phone")}
                     onBlur={handleBlur("phone")}
                     iconName="phone-outline"
                     returnKeyType="next"
-                    errorText={errors.phone}
-                    error={touched.phone && errors.phone !== undefined}
+                    disabled={user.phoneNumber}
+                    errorText={errors.phone_number}
+                    error={
+                      touched.phone_number && errors.phone_number !== undefined
+                    }
                   />
-
+                  <TextInputIcon
+                    value={values.organization}
+                    inputLablel={"Organization"}
+                    onChangeText={handleChange("organization")}
+                    onBlur={handleBlur("organization")}
+                    iconName="domain"
+                    returnKeyType="next"
+                    errorText={errors.organization}
+                    error={
+                      touched.organization && errors.organization !== undefined
+                    }
+                  />
                   <TextInputIcon
                     value={values.note}
                     inputLablel={"Note"}

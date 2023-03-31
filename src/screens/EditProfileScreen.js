@@ -6,42 +6,46 @@ import * as ImagePicker from "expo-image-picker";
 import TextInputIcon from "../components/TextInputIcon";
 import { Formik } from "formik";
 import * as Yup from "yup";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
+import { uploadAvatarImage } from "../firebase";
+import { updateUserById } from "../store/reducers/userSlice";
+import { setNotification } from "../store/reducers/notificationSlice";
 
 const EditProfileScreen = ({ navigation }) => {
+  const dispatch = useDispatch();
+
   const user = useSelector((state) => state.user);
-  const [userAvatar, setUserAvatar] = useState({
-    isChanged: false,
-    uri: "",
-  });
   const userInfoSchema = Yup.object({
     name: Yup.string().required("Full name is a required field."),
     email: Yup.string().email().required("Email is a required field."),
-    phone: Yup.number(),
+    phone_number: Yup.string(),
+    photo_url: Yup.string(),
   });
-  const pickImage = async () => {
+  const pickImage = async (setFieldValue) => {
     let result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.All,
       allowsEditing: true,
       aspect: [4, 3],
       quality: 1,
     });
-
-    // let result = await ImagePicker.launchCameraAsync({
-    //   mediaTypes: ImagePicker.MediaTypeOptions.All,
-    //   allowsEditing: true,
-    //   aspect: [3, 3],
-    //   quality: 1,
-    // });
-
     if (!result.canceled) {
-      setUserAvatar({
-        isChanged: true,
-        uri: result.assets[0].uri,
-      });
+      setFieldValue("photo_url", result.assets[0].uri);
     }
   };
-  const handleEditProfile = (values, actions) => {
+  const handleEditProfile = async (values, actions) => {
+    let photo_url = "";
+    if (values.photo_url !== user.photoURL) {
+      photo_url = await uploadAvatarImage(values.photo_url, user.uid);
+    }
+    dispatch(
+      updateUserById({
+        id: user.uid,
+        photo_url: photo_url,
+        name: values.name,
+        phone_number: values.phone_number,
+      })
+    );
+    dispatch(setNotification("Update information successfully!"));
     actions.setSubmitting(false);
     navigation.goBack();
   };
@@ -61,7 +65,8 @@ const EditProfileScreen = ({ navigation }) => {
             initialValues={{
               name: user.name,
               email: user.email,
-              phone: user.phone,
+              phone_number: user.phoneNumber,
+              photo_url: user.photoURL,
             }}
             enableReinitialize={true}
             initialTouched={{
@@ -84,10 +89,17 @@ const EditProfileScreen = ({ navigation }) => {
             }) => {
               return (
                 <>
-                  <TouchableOpacity activeOpacity={0.6} onPress={pickImage}>
+                  <TouchableOpacity
+                    activeOpacity={0.6}
+                    onPress={() => pickImage(setFieldValue)}
+                  >
                     <View>
                       <Avatar.Image
-                        source={require("../assets/avatar.jpg")}
+                        source={
+                          values.photo_url
+                            ? { uri: values.photo_url }
+                            : require("../assets/avatar.jpg")
+                        }
                         size={130}
                       />
                       <Avatar.Icon
@@ -101,18 +113,9 @@ const EditProfileScreen = ({ navigation }) => {
                   </TouchableOpacity>
                   <View style={styles.box}></View>
                   <TextInputIcon
-                    value={values.name}
-                    inputLablel={"Fullname"}
-                    onChangeText={handleChange("name")}
-                    onBlur={handleBlur("name")}
-                    iconName="account-outline"
-                    returnKeyType="next"
-                    errorText={errors.name}
-                    error={touched.name && errors.name !== undefined}
-                  />
-                  <TextInputIcon
                     value={values.email}
                     inputLablel={"Email"}
+                    disabled={true}
                     onChangeText={handleChange("email")}
                     onBlur={handleBlur("email")}
                     iconName="email-outline"
@@ -125,14 +128,26 @@ const EditProfileScreen = ({ navigation }) => {
                     error={touched.email && errors.email !== undefined}
                   />
                   <TextInputIcon
-                    value={values.phone}
-                    inputLablel={"Phone"}
-                    onChangeText={handleChange("phone")}
-                    onBlur={handleBlur("phone")}
+                    value={values.name}
+                    inputLablel={"Fullname"}
+                    onChangeText={handleChange("name")}
+                    onBlur={handleBlur("name")}
+                    iconName="account-outline"
+                    returnKeyType="next"
+                    errorText={errors.name}
+                    error={touched.name && errors.name !== undefined}
+                  />
+                  <TextInputIcon
+                    value={values.phone_number}
+                    inputLablel={"Phone number"}
+                    onChangeText={handleChange("phone_number")}
+                    onBlur={handleBlur("phone_number")}
                     iconName="phone-outline"
                     returnKeyType="next"
-                    errorText={errors.phone}
-                    error={touched.phone && errors.phone !== undefined}
+                    errorText={errors.phone_number}
+                    error={
+                      touched.phone_number && errors.phone_number !== undefined
+                    }
                   />
                   <Button
                     mode="contained"

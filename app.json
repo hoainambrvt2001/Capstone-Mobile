@@ -4,14 +4,6 @@
     "slug": "bk-access",
     "version": "1.0.0",
     "assetBundlePatterns": ["**/*"],
-    "plugins": [
-      "react-native-vision-camera",
-      [
-        "expo-camera",
-        {
-          "cameraPermission": "Allow our application to access your camera."
-        }
-      ]
-    ]
+    "plugins": ["react-native-vision-camera"]
   }
 }

@@ -12,7 +12,7 @@ import BackButton from "../components/BackButton";
 import { theme } from "../theme/theme";
 import Colors from "../theme/Colors";
 import auth from "@react-native-firebase/auth";
-import { createUserData } from "../store/reducers/userSlice";
+import { createUserByEmailAndPassword } from "../store/reducers/userSlice";
 import { useDispatch } from "react-redux";
 
 const SignUpScreen = ({ navigation }) => {
@@ -46,7 +46,7 @@ const SignUpScreen = ({ navigation }) => {
           token: idTokenResult.token,
           expirationTime: idTokenResult.expirationTime,
         };
-        dispatch(createUserData(params));
+        dispatch(createUserByEmailAndPassword(params));
       })
       .catch((error) => {
         if (error.code === "auth/email-already-in-use") {

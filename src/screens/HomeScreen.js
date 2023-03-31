@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { StyleSheet, View } from "react-native";
 import { Appbar, Avatar, Text } from "react-native-paper";
 import AccessHistoryCard from "../components/AccessHistoryCard";
@@ -7,10 +7,40 @@ import WeatherWidget from "../components/WeatherWidget";
 import Colors from "../theme/Colors";
 import { useSelector } from "react-redux";
 import { format } from "date-fns";
+import * as Location from "expo-location";
+import { fetchWeatherData } from "../api";
 
 const HomeScreen = () => {
   const user = useSelector((state) => state.user);
   const today = format(new Date(), "cccc, do LLL yyyy");
+  const [location, setLocation] = useState(null);
+  const [errorMsg, setErrorMsg] = useState(null);
+  const [weatherData, setWeatherData] = useState(null);
+
+  useEffect(() => {
+    const getLocationPermission = async () => {
+      let { status } = await Location.requestForegroundPermissionsAsync();
+      if (status !== "granted") {
+        setErrorMsg("Permission to access location was denied");
+        return;
+      }
+      let location = await Location.getCurrentPositionAsync({});
+      setLocation(location);
+    };
+    getLocationPermission();
+  }, []);
+
+  useEffect(() => {
+    const getWeatherData = async (location) => {
+      if (location && !weatherData) {
+        const fetchData = await fetchWeatherData(location.coords);
+        setWeatherData(fetchData);
+      }
+    };
+    getWeatherData(location);
+  }, [location]);
+
+  const weather = 1;
   return (
     <>
       <Appbar.Header style={styles.header}>
@@ -21,17 +51,25 @@ const HomeScreen = () => {
           />
           <Appbar.Content title={today} titleStyle={styles.header_subtitle} />
         </View>
-        <Avatar.Image size={35} source={require("../assets/avatar.jpg")} />
+        <Avatar.Image
+          source={
+            user.photoURL
+              ? { uri: user.photoURL }
+              : require("../assets/avatar.jpg")
+          }
+          size={40}
+        />
       </Appbar.Header>
 
       <Background>
-        <WeatherWidget />
+        <WeatherWidget weatherData={weatherData} />
         <View style={styles.section_wrapper}>
           <Text style={styles.section_title}>Recent activities</Text>
           <AccessHistoryCard />
           <AccessHistoryCard />
           <AccessHistoryCard />
         </View>
+        <View style={styles.box}></View>
       </Background>
     </>
   );
@@ -69,6 +107,9 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: Colors.pink,
     marginBottom: 5,
+  },
+  box: {
+    height: 40,
   },
 });
 

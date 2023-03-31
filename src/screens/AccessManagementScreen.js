@@ -1,15 +1,27 @@
 import React, { useState } from "react";
 import { ScrollView, StyleSheet, View } from "react-native";
 import { Text, Appbar, Button, Dialog } from "react-native-paper";
+import { useSelector } from "react-redux";
 import AccessKeyCard from "../components/AccessKeyCard";
 import Colors from "../theme/Colors";
 
 const AccessManagementScreen = ({ navigation }) => {
+  const currUser = useSelector((state) => state.user);
+
   const [visible, setVisible] = useState(false);
 
-  const showDialog = () => setVisible(true);
+  const showUpdateFaceDialog = () => setVisible(true);
 
-  const hideDialog = () => setVisible(false);
+  const hideUpdateFaceDialog = () => setVisible(false);
+
+  const handleRequestAdmin = () => {
+    if (!currUser) return;
+    if (currUser.numberFaceImages !== 0) {
+      navigation.push("RequestAdminScreen");
+    } else {
+      showUpdateFaceDialog();
+    }
+  };
 
   return (
     <>
@@ -35,8 +47,7 @@ const AccessManagementScreen = ({ navigation }) => {
           <Button
             mode="contained"
             style={styles.btnRequest}
-            // onPress={() => navigation.push("RequestAdminScreen")}
-            onPress={showDialog}
+            onPress={handleRequestAdmin}
           >
             Request Admin
           </Button>
@@ -44,7 +55,7 @@ const AccessManagementScreen = ({ navigation }) => {
       </ScrollView>
       <Dialog
         visible={visible}
-        onDismiss={hideDialog}
+        onDismiss={hideUpdateFaceDialog}
         style={{ backgroundColor: Colors.white }}
       >
         <Dialog.Title style={styles.dialog_title}>
@@ -58,18 +69,20 @@ const AccessManagementScreen = ({ navigation }) => {
         </Dialog.Content>
         <Dialog.Actions style={{ justifyContent: "space-between" }}>
           <Button
-            onPress={hideDialog}
-            labelStyle={{ color: Colors.pink }}
+            onPress={hideUpdateFaceDialog}
+            style={{ padding: 10 }}
             buttonColor={Colors.white}
+            textColor={Colors.pink}
             mode="elevated"
           >
             Later
           </Button>
           <Button
             onPress={() => {
-              hideDialog();
+              hideUpdateFaceDialog();
               navigation.push("UpdateFaceScreen");
             }}
+            style={{ padding: 10 }}
             buttonColor={Colors.pink}
             mode="contained"
           >

@@ -3,6 +3,8 @@ import {
   GoogleSigninButton,
 } from "@react-native-google-signin/google-signin";
 import auth from "@react-native-firebase/auth";
+import { useDispatch } from "react-redux";
+import { signInByGoogle } from "../store/reducers/userSlice";
 
 GoogleSignin.configure({
   webClientId:
@@ -10,6 +12,8 @@ GoogleSignin.configure({
 });
 
 const CustomGoogleSignIn = () => {
+  const dispatch = useDispatch();
+
   const onGoogleButtonPress = async () => {
     // Check if your device supports Google Play
     await GoogleSignin.hasPlayServices({ showPlayServicesUpdateDialog: true });
@@ -23,12 +27,16 @@ const CustomGoogleSignIn = () => {
     await auth()
       .signInWithCredential(googleCredential)
       .then(async (data) => {
-        const token = await data.user.getIdToken();
-        const user = {
-          userId: data.user.uid,
-          token: token,
+        const idTokenResult = await data.user.getIdTokenResult();
+        const params = {
+          name: data.user.displayName,
+          email: data.user.email,
+          photoURL: data.user.photoURL,
+          phoneNumber: data.user.phoneNumber,
+          token: idTokenResult.token,
+          expirationTime: idTokenResult.expirationTime,
         };
-        console.log(user);
+        dispatch(signInByGoogle(params));
       });
   };
 
@@ -38,7 +46,6 @@ const CustomGoogleSignIn = () => {
       size={GoogleSigninButton.Size.Wide}
       color={GoogleSigninButton.Color.Dark}
       onPress={onGoogleButtonPress}
-      // disabled={this.state.isSigninInProgress}
     />
   );
 };

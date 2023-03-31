@@ -13,7 +13,7 @@ import CustomGoogleSignIn from "../components/GoogleSignIn";
 import Colors from "../theme/Colors";
 import auth from "@react-native-firebase/auth";
 import { useDispatch } from "react-redux";
-import { fetchUserData } from "../store/reducers/userSlice";
+import { signInByEmailAndPassword } from "../store/reducers/userSlice";
 
 const SignInScreen = ({ navigation }) => {
   const dispatch = useDispatch();
@@ -35,7 +35,7 @@ const SignInScreen = ({ navigation }) => {
           token: idTokenResult.token,
           expirationTime: idTokenResult.expirationTime,
         };
-        dispatch(fetchUserData(params));
+        dispatch(signInByEmailAndPassword(params));
       })
       .catch((error) => {
         if (error.code === "auth/invalid-email") {

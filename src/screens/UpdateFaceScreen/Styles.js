@@ -23,7 +23,6 @@ const styles = EStyleSheet.create({
   },
   component_container: {
     flex: 1,
-    padding: 20,
     width: "100%",
     alignSelf: "center",
     alignItems: "center",
@@ -67,11 +66,11 @@ const styles = EStyleSheet.create({
     overflow: "hidden",
   },
   photoScanRingIcon: {
-    width: "79%",
-    height: "250rem",
+    width: "90%",
+    height: "290rem",
     position: "absolute",
-    left: "10.5%",
-    top: "30rem",
+    left: "5%",
+    top: 10,
   },
   frontIdContainer: {
     flex: 1,
@@ -102,8 +101,7 @@ const styles = EStyleSheet.create({
   flashOnOfBtnContent: {
     position: "absolute",
     right: "20rem",
-    top: statusBarHeight + 15,
-    zIndex: 999999,
+    top: 15,
   },
   flashOnOfBtn: {
     width: "40rem",

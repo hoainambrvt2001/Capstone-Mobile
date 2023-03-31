@@ -1,23 +1,38 @@
 import React, { useState, useEffect, useRef } from "react";
-import { TouchableOpacity, View, Image, Linking, Text } from "react-native";
+import { runOnJS } from "react-native-reanimated";
+import { TouchableOpacity, View, Image, Text } from "react-native";
 import { Appbar } from "react-native-paper";
-import { Camera, useCameraDevices } from "react-native-vision-camera";
+import {
+  Camera,
+  useCameraDevices,
+  useFrameProcessor,
+} from "react-native-vision-camera";
 import { useSelector } from "react-redux";
 import Background from "../../components/Background";
 import { uploadImageToTrain } from "../../firebase";
-import Colors from "../../theme/Colors";
 import styles from "./Styles";
+import { scanFaces } from "vision-camera-face-detector";
+
+import { useDispatch } from "react-redux";
+import { updateUserById } from "../../store/reducers/userSlice";
+import { setNotification } from "../../store/reducers/notificationSlice";
+import Colors from "../../theme/Colors";
 
 function CameraScreen({ navigation }) {
-  const cameraRef = useRef(null);
+  const dispatch = useDispatch();
+  const currentUser = useSelector((state) => state.user);
   const devices = useCameraDevices();
   const device = devices.back;
+  const cameraRef = useRef(null);
   const [flashModeOn, setFlashModeOn] = useState(false);
-  const [faceImgSrc, setFaceImgSrc] = useState("");
-  const currentUser = useSelector((state) => state.user);
+  const [faces, setFaces] = useState([]);
 
   const takePicture = async () => {
     try {
+      if (faces.length !== 1) {
+        dispatch(setNotification("Your face is invalid. Try again!"));
+        return;
+      }
       if (cameraRef.current !== null) {
         const options = {
           quality: 100,
@@ -28,9 +43,17 @@ function CameraScreen({ navigation }) {
         }
         const photo = await cameraRef.current.takeSnapshot(options);
         const photoPath = "file://" + photo.path;
-        uploadImageToTrain(photoPath, currentUser.id);
-        console.log(photoPath);
-        setFaceImgSrc(photoPath);
+        const result = await uploadImageToTrain(photoPath, currentUser);
+        if (result) {
+          dispatch(
+            updateUserById({
+              id: currentUser.uid,
+              number_face_images: currentUser.numberFaceImages + 1,
+            })
+          );
+          dispatch(setNotification("Update face successfully!"));
+          navigation.goBack();
+        }
       } else {
         console.log("No camera is available.");
       }
@@ -46,10 +69,15 @@ function CameraScreen({ navigation }) {
       if (permission == "denied") {
         const requestPermission = await Camera.requestCameraPermission();
         console.log(`Camera permission status: ${requestPermission}`);
-        if (requestPermission == "denied") await Linking.openSettings();
       }
     };
     getCameraPermission();
+  }, []);
+
+  const frameProcessor = useFrameProcessor((frame) => {
+    "worklet";
+    const scannedFaces = scanFaces(frame);
+    runOnJS(setFaces)(scannedFaces);
   }, []);
 
   return (
@@ -63,59 +91,70 @@ function CameraScreen({ navigation }) {
         <Appbar.Content title="Update face" titleStyle={styles.headerTitle} />
       </Appbar.Header>
       {device ? (
-        <View style={styles.component_wrapper}>
-          <View style={styles.component_container}>
-            <View style={styles.cameraContent}>
-              <Camera
-                style={styles.preview}
-                ref={cameraRef}
-                device={device}
-                photo={true}
-                isActive={true}
-              />
+        <>
+          <View style={styles.flashOnOfBtnContent}>
+            <TouchableOpacity
+              style={styles.flashOnOfBtn}
+              onPress={() => setFlashModeOn(!flashModeOn)}
+            >
               <Image
-                source={require("../../assets/photoScanRingIcon.png")}
+                source={
+                  flashModeOn
+                    ? require("../../assets/FlashOn.png")
+                    : require("../../assets/FlashOff.png")
+                }
                 resizeMode="contain"
-                style={styles.photoScanRingIcon}
+                style={styles.flashOnOffImg}
               />
-              <View style={styles.frontIdContainer}>
-                <Text style={styles.frontIdHeading}>Front of ID</Text>
-                <Text style={styles.frontIdPeregraph}>
-                  Fit the front of your ID within the frame - check for good
-                  lighting.
-                </Text>
-                <View style={styles.clickPhotoBtnContent}>
-                  <TouchableOpacity
-                    style={styles.clickPhotoBtn}
-                    onPress={takePicture.bind(this)}
-                  />
+            </TouchableOpacity>
+          </View>
+          <View style={styles.component_wrapper}>
+            <View style={styles.component_container}>
+              <View style={styles.cameraContent}>
+                <Camera
+                  style={styles.preview}
+                  ref={cameraRef}
+                  device={device}
+                  photo={true}
+                  isActive={true}
+                  frameProcessor={frameProcessor}
+                  frameProcessorFps={5}
+                  orientation={"landscapeRight"}
+                />
+                <Image
+                  source={require("../../assets/photoScanRingIcon.png")}
+                  resizeMode="contain"
+                  style={styles.photoScanRingIcon}
+                />
+                <View style={styles.frontIdContainer}>
+                  <Text
+                    style={{
+                      ...styles.frontIdHeading,
+                      color: faces.length === 1 ? "#23DC3D" : Colors.pink,
+                    }}
+                  >
+                    Front of ID
+                  </Text>
+                  <Text style={styles.frontIdPeregraph}>
+                    {faces.length === 1
+                      ? "All good, the face is valid.\nLet's take a photo of your face!"
+                      : "Fit the front of your ID within the frame - check for good lighting!"}
+                  </Text>
+                  <View style={styles.clickPhotoBtnContent}>
+                    <TouchableOpacity
+                      style={{
+                        ...styles.clickPhotoBtn,
+                        borderColor:
+                          faces.length === 1 ? "#23DC3D" : Colors.pink,
+                      }}
+                      onPress={takePicture.bind(this)}
+                    />
+                  </View>
                 </View>
               </View>
             </View>
-            <View style={styles.flashOnOfBtnContent}>
-              <TouchableOpacity
-                style={styles.flashOnOfBtn}
-                onPress={() => setFlashModeOn(!flashModeOn)}
-              >
-                <Image
-                  source={
-                    flashModeOn
-                      ? require("../../assets/FlashOn.png")
-                      : require("../../assets/FlashOff.png")
-                  }
-                  resizeMode="contain"
-                  style={styles.flashOnOffImg}
-                />
-              </TouchableOpacity>
-            </View>
           </View>
-          {/* <Image
-            source={
-              imgSrc ? { uri: imgSrc } : require("../../assets/avatar.jpg")
-            }
-            style={{ width: "100%", height: "30%" }}
-          /> */}
-        </View>
+        </>
       ) : (
         <Background>
           <View>
