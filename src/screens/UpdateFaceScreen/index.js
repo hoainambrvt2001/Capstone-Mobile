@@ -94,6 +94,12 @@ function CameraScreen({ navigation }) {
     runOnJS(setFaces)(scannedFaces);
   }, []);
 
+  useEffect(() => {
+    console.log(faces);
+
+    return () => {};
+  }, [faces]);
+
   return (
     <>
       <Appbar.Header mode="center-aligned" style={styles.header}>

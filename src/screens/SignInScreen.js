@@ -11,13 +11,12 @@ import Logo from "../components/Logo";
 import Header from "../components/Header";
 import CustomGoogleSignIn from "../components/GoogleSignIn";
 import Colors from "../theme/Colors";
-import { useDispatch, useSelector } from "react-redux";
+import { useDispatch } from "react-redux";
 import { signInByEmailAndPassword } from "../store/reducers/userSlice";
 import { AuthContext } from "../auth";
 
 const SignInScreen = ({ navigation }) => {
   const dispatch = useDispatch();
-  const user = useSelector((state) => state.user);
   const { signIn } = useContext(AuthContext);
 
   const userSchema = Yup.object({
@@ -31,12 +30,9 @@ const SignInScreen = ({ navigation }) => {
     const params = {
       email: values.email,
       password: values.password,
+      signInCallback: signIn,
     };
     dispatch(signInByEmailAndPassword(params));
-    signIn({
-      token: user.token,
-      token_expiration_time: user.tokenExpirationTime,
-    });
     actions.setSubmitting(false);
   };
 

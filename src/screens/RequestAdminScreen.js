@@ -1,34 +1,76 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { StyleSheet, View, ScrollView } from "react-native";
 import { Text, Button, Appbar } from "react-native-paper";
 import Colors from "../theme/Colors";
 import TextInputIcon from "../components/TextInputIcon";
 import { Formik } from "formik";
 import * as Yup from "yup";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
+import { SelectList } from "react-native-dropdown-select-list";
+import { createRequestAccess, fetchOrganizationByName } from "../api";
+import { setNotification } from "../store/reducers/notificationSlice";
 
 const RequestAdminScreen = ({ navigation }) => {
+  const [queryOrganization, setQueryOrganization] = useState("");
+  const [totalOrganization, setTotalOrganization] = useState([]);
+  const dispatch = useDispatch();
   const user = useSelector((state) => state.user);
   const initRequestInfo = {
     name: user.name,
     email: user.email,
     phone_number: user.phoneNumber ? user.phoneNumber : "",
-    organization: "",
+    organization_id: "",
     note: "",
   };
+  useEffect(() => {
+    const fetchOrganization = async () => {
+      const params = {
+        token: user.token,
+        s: queryOrganization,
+        page: 1,
+        limit: 5,
+      };
+      const res = await fetchOrganizationByName(params);
+      if (res) {
+        setTotalOrganization(
+          res.data.map((item) => {
+            return {
+              key: item._id,
+              value: item.name,
+            };
+          })
+        );
+      }
+    };
+    fetchOrganization();
+    return () => {};
+  }, [queryOrganization]);
+
   const requestInfoSchema = Yup.object({
     name: Yup.string().required("Full name is a required field."),
     email: Yup.string().email().required("Email is a required field."),
     phone_number: Yup.string().required("Contact is a required field."),
-    // TODO: Need to validate before request
-    organization: Yup.string().required("Organization is a required field."),
+    organization_id: Yup.string().required("Organization is a required field."),
     note: Yup.string(),
   });
-  const handleSendRequest = (values, actions) => {
+
+  const handleSendRequest = async (values, actions) => {
+    const params = {
+      token: user.token,
+      organization_id: values.organization_id,
+      note: values.note,
+      requested_time: new Date().toISOString(),
+    };
+    const createdRequest = await createRequestAccess(params);
+    if (createdRequest) {
+      dispatch(setNotification("Successful request creation!"));
+    } else {
+      dispatch(setNotification("Fail to make a request!"));
+    }
     actions.setSubmitting(false);
-    console.log(values);
     navigation.goBack();
   };
+
   return (
     <>
       <Appbar.Header mode="center-aligned" style={styles.header}>
@@ -48,7 +90,7 @@ const RequestAdminScreen = ({ navigation }) => {
             initialValues={initRequestInfo}
             enableReinitialize={true}
             initialTouched={{
-              organization: false,
+              organization_id: false,
               phone_number: false,
             }}
             validationSchema={requestInfoSchema}
@@ -76,7 +118,39 @@ const RequestAdminScreen = ({ navigation }) => {
                       Make sure that your organization has been registered.
                     </Text>
                   </View>
-
+                  <View
+                    style={{
+                      width: "100%",
+                      marginVertical: 4,
+                    }}
+                  >
+                    <SelectList
+                      setSelected={(val) =>
+                        setFieldValue("organization_id", val)
+                      }
+                      onSelect={(val) => setQueryOrganization(val)}
+                      data={totalOrganization}
+                      save="key"
+                      boxStyles={{
+                        borderRadius: 25,
+                        borderColor: Colors.opacityDarkGray,
+                      }}
+                      dropdownTextStyles={{
+                        fontSize: 15,
+                      }}
+                      dropdownStyles={{
+                        borderRadius: 15,
+                        borderColor: Colors.opacityDarkGray,
+                        backgroundColor: Colors.lightWhite,
+                      }}
+                      placeholder="Organization"
+                      searchPlaceholder="Search organization"
+                      inputStyles={{
+                        fontSize: 16,
+                        color: Colors.black,
+                      }}
+                    />
+                  </View>
                   <TextInputIcon
                     value={values.name}
                     inputLablel={"Name"}
@@ -84,7 +158,7 @@ const RequestAdminScreen = ({ navigation }) => {
                     onBlur={handleBlur("fullname")}
                     iconName="account-outline"
                     returnKeyType="next"
-                    disabled={true}
+                    editable={false}
                     errorText={errors.name}
                     error={touched.name && errors.name !== undefined}
                   />
@@ -99,33 +173,21 @@ const RequestAdminScreen = ({ navigation }) => {
                     textContentType="emailAddress"
                     keyboardType="email-address"
                     returnKeyType="next"
-                    disabled={true}
+                    editable={false}
                     errorText={errors.email}
                     error={touched.email && errors.email !== undefined}
                   />
                   <TextInputIcon
                     value={values.phone_number}
                     inputLablel={"Contact"}
-                    onChangeText={handleChange("phone")}
-                    onBlur={handleBlur("phone")}
+                    onChangeText={handleChange("phone_number")}
+                    onBlur={handleBlur("phone_number")}
                     iconName="phone-outline"
                     returnKeyType="next"
-                    disabled={user.phoneNumber}
+                    editable={!user.phoneNumber}
                     errorText={errors.phone_number}
                     error={
                       touched.phone_number && errors.phone_number !== undefined
-                    }
-                  />
-                  <TextInputIcon
-                    value={values.organization}
-                    inputLablel={"Organization"}
-                    onChangeText={handleChange("organization")}
-                    onBlur={handleBlur("organization")}
-                    iconName="domain"
-                    returnKeyType="next"
-                    errorText={errors.organization}
-                    error={
-                      touched.organization && errors.organization !== undefined
                     }
                   />
                   <TextInputIcon

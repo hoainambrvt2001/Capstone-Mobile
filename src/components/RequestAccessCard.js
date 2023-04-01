@@ -4,14 +4,10 @@ import EStyleSheet from "react-native-extended-stylesheet";
 import Colors from "../theme/Colors";
 import Fonts from "../theme/Fonts";
 import Icon from "react-native-vector-icons/FontAwesome5";
+import { format } from "date-fns";
 
-const AccessKeyCard = ({
-  access_hitory_info = {
-    organization: "HCMUT",
-    time: "10:00 02/23/2023",
-  },
-}) => {
-  const { room, organization, time } = access_hitory_info;
+const RequestAccessCard = ({ request }) => {
+  const { organization, requested_time, status } = request;
   return (
     <View style={styles.card_wrapper}>
       <View style={styles.access_icon_wrapper}>
@@ -19,9 +15,23 @@ const AccessKeyCard = ({
       </View>
       <View style={styles.access_text}>
         <Text style={styles.access_organization}>
-          Organization: {organization}
+          Organization:
+          <Text
+            style={{ fontWeight: "400", color: Colors.darkGray }}
+          >{` ${organization.name}`}</Text>
         </Text>
-        <Text style={styles.access_time}>Registered in: {time}</Text>
+        <Text style={styles.access_time}>
+          Requested on:
+          <Text style={{ fontWeight: "400", color: Colors.darkGray }}>
+            {` ${format(new Date(requested_time), "Pp")}`}
+          </Text>
+        </Text>
+        <Text style={styles.status}>
+          Status:
+          <Text style={{ fontWeight: "400", color: Colors.darkGray }}>
+            {` ${status.charAt(0).toUpperCase() + status.slice(1)}`}
+          </Text>
+        </Text>
       </View>
     </View>
   );
@@ -29,7 +39,6 @@ const AccessKeyCard = ({
 
 const styles = EStyleSheet.create({
   card_wrapper: {
-    // paddingHorizontal: "4rem",
     paddingTop: "4rem",
     paddingBottom: "14rem",
     marginBottom: "17rem",
@@ -56,17 +65,23 @@ const styles = EStyleSheet.create({
   },
   access_organization: {
     lineHeight: "21rem",
-    color: Colors.black,
+    color: Colors.darkBlack,
     marginBottom: "5rem",
     fontSize: Fonts.size.normalText,
     fontWeight: "bold",
   },
   access_time: {
-    lineHeight: "18rem",
-    color: Colors.darkGray,
+    lineHeight: "21rem",
+    color: Colors.darkBlack,
     fontSize: Fonts.size.medium,
-    fontWeight: "400",
+    fontWeight: "bold",
+  },
+  status: {
+    lineHeight: "21rem",
+    color: Colors.darkBlack,
+    fontSize: Fonts.size.medium,
+    fontWeight: "bold",
   },
 });
 
-export default AccessKeyCard;
+export default RequestAccessCard;

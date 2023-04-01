@@ -1,5 +1,6 @@
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import React, { useEffect, useRef } from "react";
+import * as SecureStore from "expo-secure-store";
 import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import Icon from "react-native-vector-icons/Feather";
 import Colors from "../theme/Colors";
@@ -9,6 +10,8 @@ import SettingScreen from "./SettingScreen";
 import AccessManagementScreen from "./AccessManagementScreen";
 
 import * as Animatable from "react-native-animatable";
+import { useDispatch, useSelector } from "react-redux";
+import { fetchMyInfo } from "../store/reducers/userSlice";
 
 const TabArr = [
   {
@@ -101,6 +104,20 @@ const TabButton = (props) => {
 };
 
 export default function MainScreen() {
+  const dispatch = useDispatch();
+  const user = useSelector((state) => state.user);
+
+  useEffect(() => {
+    const fetchMe = async () => {
+      if (!user.token) {
+        token = await SecureStore.getItemAsync("access_token");
+        dispatch(fetchMyInfo({ token }));
+      }
+    };
+    fetchMe();
+    return () => {};
+  }, []);
+
   return (
     <Tab.Navigator
       screenOptions={{

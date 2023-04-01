@@ -1,14 +1,28 @@
-import React, { useState } from "react";
-import { ScrollView, StyleSheet, View } from "react-native";
+import React, { useState, useEffect } from "react";
+import { ScrollView, StyleSheet, View, Image } from "react-native";
 import { Text, Appbar, Button, Dialog } from "react-native-paper";
 import { useSelector } from "react-redux";
-import AccessKeyCard from "../components/AccessKeyCard";
 import Colors from "../theme/Colors";
+import { fetchListRequestByUID } from "../api";
+import RequestAccessCard from "../components/RequestAccessCard";
 
 const AccessManagementScreen = ({ navigation }) => {
   const currUser = useSelector((state) => state.user);
 
   const [visible, setVisible] = useState(false);
+  const [listRequest, setListRequest] = useState([]);
+
+  useEffect(() => {
+    const fetchListRequest = async () => {
+      const res = await fetchListRequestByUID({
+        uid: currUser.uid,
+        token: currUser.token,
+      });
+      if (res) setListRequest(res.data);
+    };
+    fetchListRequest();
+    return () => {};
+  }, []);
 
   const showUpdateFaceDialog = () => setVisible(true);
 
@@ -41,9 +55,31 @@ const AccessManagementScreen = ({ navigation }) => {
           <Text style={styles.section_title}>
             Registered Access Organization
           </Text>
-          <AccessKeyCard />
-          <AccessKeyCard />
-          <AccessKeyCard />
+          {listRequest.length !== 0 ? (
+            listRequest.map((request, idx) => {
+              return <RequestAccessCard key={idx} request={request} />;
+            })
+          ) : (
+            <View
+              style={{
+                alignItems: "center",
+                justifyContent: "center",
+                width: "100%",
+                marginVertical: 20,
+              }}
+            >
+              <Image
+                alt="no-content"
+                source={require("../assets/no-content.png")}
+                style={{ width: 128, height: 128, marginBottom: 10 }}
+              />
+              <Text style={{ textAlign: "center", fontSize: 15 }}>
+                {
+                  "There is no request access.\nTo access any rooms, you need to register!"
+                }
+              </Text>
+            </View>
+          )}
           <Button
             mode="contained"
             style={styles.btnRequest}

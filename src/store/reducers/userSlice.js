@@ -1,8 +1,8 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import {
   createUserWithEmailAndPassword,
+  fetchMe,
   signInWithEmailAndPassword,
-  fetchUserWithEmail,
   updateUserWithId,
 } from "../../api";
 
@@ -21,6 +21,10 @@ export const createUserByEmailAndPassword = createAsyncThunk(
   "user/createUserByEmailAndPassword",
   async (params) => {
     const res = await createUserWithEmailAndPassword(params);
+    params.signUpCallback({
+      token: res.data.token,
+      token_expiration_time: res.data.expiration_time,
+    });
     return res.data;
   }
 );
@@ -29,22 +33,29 @@ export const signInByEmailAndPassword = createAsyncThunk(
   "user/signInByEmailAndPassword",
   async (params) => {
     const res = await signInWithEmailAndPassword(params);
+    params.signInCallback({
+      token: res.data.token,
+      token_expiration_time: res.data.expiration_time,
+    });
     return res.data;
   }
 );
 
-export const fetchUserById = createAsyncThunk(
-  "user/fetchUserById",
+export const fetchMyInfo = createAsyncThunk(
+  "user/fetchMyInfo",
   async (params) => {
-    const res = await fetchUserWithEmail(params);
-    return res.data;
+    const res = await fetchMe(params);
+    return {
+      user: res.data.user,
+      token: params.token,
+      expiration_time: params.expiration_time,
+    };
   }
 );
 
 export const updateUserById = createAsyncThunk(
   "user/updateUserById",
   async (params) => {
-    console.log(params);
     let updateData = {};
     if (params.name) updateData.name = params.name;
     if (params.phone_number) updateData.phone_number = params.phone_number;
@@ -91,13 +102,16 @@ const UserSlice = createSlice({
       state.token = token;
       state.tokenExpirationTime = expiration_time;
     });
-    builder.addCase(fetchUserById.fulfilled, (state, action) => {
-      const { user } = action.payload;
+    builder.addCase(fetchMyInfo.fulfilled, (state, action) => {
+      const { user, token, expiration_time } = action.payload;
       state.uid = user.id;
       state.email = user.email;
       state.name = user.name;
+      state.photoURL = user.photo_url;
       state.phoneNumber = user.phone_number;
       state.registeredFaces = user.registered_faces;
+      state.token = token;
+      state.tokenExpirationTime = expiration_time;
     });
     builder.addCase(updateUserById.fulfilled, (state, action) => {
       const { name, photo_url, phone_number, registered_faces } =

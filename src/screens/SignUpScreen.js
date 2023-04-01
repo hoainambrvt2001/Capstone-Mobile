@@ -11,12 +11,11 @@ import TextInput from "../components/TextInput";
 import BackButton from "../components/BackButton";
 import Colors from "../theme/Colors";
 import { createUserByEmailAndPassword } from "../store/reducers/userSlice";
-import { useDispatch, useSelector } from "react-redux";
+import { useDispatch } from "react-redux";
 import { AuthContext } from "../auth";
 
 const SignUpScreen = ({ navigation }) => {
   const dispatch = useDispatch();
-  const user = useSelector((state) => state.user);
   const { signUp } = useContext(AuthContext);
 
   const userSchema = Yup.object({
@@ -40,12 +39,9 @@ const SignUpScreen = ({ navigation }) => {
       name: values.name,
       email: values.email,
       password: values.password,
+      signUpCallback: signUp,
     };
     dispatch(createUserByEmailAndPassword(params));
-    signUp({
-      token: user.token,
-      token_expiration_time: user.tokenExpirationTime,
-    });
     actions.setSubmitting(false);
   };
 

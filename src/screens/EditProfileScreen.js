@@ -117,7 +117,7 @@ const EditProfileScreen = ({ navigation }) => {
                   <TextInputIcon
                     value={values.email}
                     inputLablel={"Email"}
-                    disabled={true}
+                    editable={false}
                     onChangeText={handleChange("email")}
                     onBlur={handleBlur("email")}
                     iconName="email-outline"

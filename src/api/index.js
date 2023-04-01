@@ -17,17 +17,21 @@ export const signInWithEmailAndPassword = async (params) => {
     email: params.email,
     password: params.password,
   };
-  console.log(bodyData);
   return await axiosClient
     .post("auth/login", bodyData)
     .then((res) => res.data)
     .catch((e) => console.log(e.message));
 };
 
-export const fetchUserWithId = async (params) => {
-  const { id } = params;
+export const fetchMe = async (params) => {
+  const { token } = params;
+  const config = {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  };
   return await axiosClient
-    .get(`user/${id}`)
+    .get(`auth/me`, config)
     .then((res) => res.data)
     .catch((e) => console.log(e));
 };
@@ -43,6 +47,38 @@ export const updateUserWithId = async (params) => {
     .patch(`user/${id}`, updateData, config)
     .then((res) => res.data)
     .catch((e) => console.log(e));
+};
+
+export const fetchOrganizationByName = async (params) => {
+  const { token, s, page, limit } = params;
+  const config = {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  };
+  return await axiosClient
+    .get(`organization/search?s=${s}&page=${page}&limit=${limit}`, config)
+    .then((res) => res.data)
+    .catch((e) => {
+      console.log(e);
+      return null;
+    });
+};
+
+export const fetchListRequestByUID = async (params) => {
+  const { token, uid } = params;
+  const config = {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  };
+  return await axiosClient
+    .get(`request-access/user/${uid}`, config)
+    .then((res) => res.data)
+    .catch((e) => {
+      console.log(e);
+      return null;
+    });
 };
 
 export const fetchWeatherData = async (location) => {
@@ -67,4 +103,21 @@ export const fetchWeatherData = async (location) => {
     })
     .catch((err) => console.log(err));
   return weatherData;
+};
+
+export const createRequestAccess = async (params) => {
+  const { token, organization_id, note, requested_time } = params;
+  const config = {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  };
+  const data = { organization_id, requested_time, note };
+  return await axiosClient
+    .post(`/request-access`, data, config)
+    .then((res) => res.data)
+    .catch((e) => {
+      console.log(e);
+      return null;
+    });
 };

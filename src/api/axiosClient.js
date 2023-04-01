@@ -1,7 +1,7 @@
 import axios from "axios";
 
 export const axiosClient = axios.create({
-  baseURL: "http://192.168.1.9:3333/",
+  baseURL: "https://dacn-backend.vercel.app/",
 });
 
 export const axiosClientWeather = axios.create({
