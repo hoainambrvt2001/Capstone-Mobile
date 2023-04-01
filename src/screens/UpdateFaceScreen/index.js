@@ -1,104 +1,104 @@
 import React, { useState, useEffect, useRef } from "react";
-import { runOnJS } from "react-native-reanimated";
 import { TouchableOpacity, View, Image, Text } from "react-native";
 import { Appbar } from "react-native-paper";
-import {
-  Camera,
-  useCameraDevices,
-  useFrameProcessor,
-} from "react-native-vision-camera";
 import { useSelector } from "react-redux";
-import Background from "../../components/Background";
 import { uploadImageToTrain } from "../../firebase";
 import styles from "./Styles";
-import { scanFaces } from "vision-camera-face-detector";
 
 import { useDispatch } from "react-redux";
 import { updateUserById } from "../../store/reducers/userSlice";
 import { setNotification } from "../../store/reducers/notificationSlice";
 import Colors from "../../theme/Colors";
 
+// Expo Camera:
+import { Camera, CameraType, FlashMode } from "expo-camera";
+import * as FaceDetector from "expo-face-detector";
+import * as ImageManipulator from "expo-image-manipulator";
+
 function CameraScreen({ navigation }) {
   const dispatch = useDispatch();
   const currUser = useSelector((state) => state.user);
-  const devices = useCameraDevices();
-  const device = devices.back;
   const cameraRef = useRef(null);
+  const [cameraType, setCameraType] = useState(CameraType.front);
+  const [hasCameraPermission, setHasCameraPermission] = useState();
   const [flashModeOn, setFlashModeOn] = useState(false);
   const [faces, setFaces] = useState([]);
 
-  const takePicture = async () => {
-    try {
-      if (faces.length !== 1) {
-        dispatch(setNotification("Your face is invalid. Try again!"));
-        return;
-      }
-      if (cameraRef.current !== null) {
-        const options = {
-          quality: 100,
-          skipMetadata: true,
-        };
-        if (device.hasFlash) {
-          options.flash = flashModeOn ? "on" : "off";
-        }
-        const photo = await cameraRef.current.takeSnapshot(options);
-        const photoPath = "file://" + photo.path;
-        let photoName;
-        if (currUser.registeredFaces.length === 2) {
-          photoName = `${currUser.uid}-0.jpg`;
-        } else {
-          photoName = `${currUser.uid}-${currUser.registeredFaces.length}.jpg`;
-        }
-        const result = await uploadImageToTrain(photoPath, photoName);
-        if (result) {
-          const newRegisteredFaces = currUser.registeredFaces.map(
-            (item) => item
-          );
-          newRegisteredFaces.push({
-            name: photoName,
-            url: result,
-          }),
-            dispatch(
-              updateUserById({
-                token: currUser.token,
-                id: currUser.uid,
-                registered_faces: newRegisteredFaces,
-              })
-            );
-          dispatch(setNotification("Update face successfully!"));
-          navigation.goBack();
-        }
-      } else {
-        console.log("No camera is available.");
-      }
-    } catch (error) {
-      console.log(error);
-      console.log("Failed to capture face!");
-    }
-  };
-
   useEffect(() => {
     const getCameraPermission = async () => {
-      const permission = await Camera.getCameraPermissionStatus();
-      if (permission == "denied") {
-        const requestPermission = await Camera.requestCameraPermission();
-        console.log(`Camera permission status: ${requestPermission}`);
-      }
+      const cameraPermission = await Camera.requestCameraPermissionsAsync();
+      setHasCameraPermission(cameraPermission.status === "granted");
     };
     getCameraPermission();
   }, []);
 
-  const frameProcessor = useFrameProcessor((frame) => {
-    "worklet";
-    const scannedFaces = scanFaces(frame);
-    runOnJS(setFaces)(scannedFaces);
-  }, []);
+  if (hasCameraPermission === undefined) {
+    return (
+      <>
+        <Appbar.Header mode="center-aligned" style={styles.header}>
+          <Appbar.BackAction
+            onPress={() => {
+              navigation.goBack();
+            }}
+          />
+          <Appbar.Content title="Update face" titleStyle={styles.headerTitle} />
+        </Appbar.Header>
+      </>
+    );
+  } else if (!hasCameraPermission) {
+    return (
+      <>
+        <Appbar.Header mode="center-aligned" style={styles.header}>
+          <Appbar.BackAction
+            onPress={() => {
+              navigation.goBack();
+            }}
+          />
+          <Appbar.Content title="Update face" titleStyle={styles.headerTitle} />
+        </Appbar.Header>
+      </>
+    );
+  }
 
-  useEffect(() => {
-    console.log(faces);
+  const takePicture = async () => {
+    let options = {
+      quality: 1,
+    };
+    let capturedPhoto = await cameraRef.current.takePictureAsync(options);
+    const resizePhoto = await ImageManipulator.manipulateAsync(
+      capturedPhoto.uri,
+      [{ resize: { width: 400, height: 300 } }],
+      { compress: 0.5 }
+    );
+    const photoPath = resizePhoto.uri;
+    const photoName =
+      currUser.registeredFaces.length === 2
+        ? `${currUser.uid}-0.jpg`
+        : `${currUser.uid}-${currUser.registeredFaces.length}.jpg`;
+    const result = await uploadImageToTrain(photoPath, photoName);
+    if (result) {
+      const newRegisteredFaces = currUser.registeredFaces.map((item) => item);
+      newRegisteredFaces.push({
+        name: photoName,
+        url: result,
+      });
+      dispatch(
+        updateUserById({
+          token: currUser.token,
+          id: currUser.uid,
+          registered_faces: newRegisteredFaces,
+        })
+      );
+      dispatch(setNotification("Update face successfully!"));
+      navigation.goBack();
+    } else {
+      dispatch(setNotification("Failed to update face!"));
+    }
+  };
 
-    return () => {};
-  }, [faces]);
+  const handleFacesDetected = ({ faces }) => {
+    setFaces(faces);
+  };
 
   return (
     <>
@@ -110,7 +110,17 @@ function CameraScreen({ navigation }) {
         />
         <Appbar.Content title="Update face" titleStyle={styles.headerTitle} />
       </Appbar.Header>
-      {device ? (
+      {hasCameraPermission === undefined ? (
+        <View>
+          <Text>Requesting permissions...</Text>
+        </View>
+      ) : !hasCameraPermission ? (
+        <View>
+          <Text>
+            Permission for camera not granted. Please change this in settings.
+          </Text>
+        </View>
+      ) : (
         <>
           <View style={styles.flashOnOfBtnContent}>
             <TouchableOpacity
@@ -133,13 +143,18 @@ function CameraScreen({ navigation }) {
               <View style={styles.cameraContent}>
                 <Camera
                   style={styles.preview}
+                  type={cameraType}
                   ref={cameraRef}
-                  device={device}
-                  photo={true}
-                  isActive={true}
-                  frameProcessor={frameProcessor}
-                  frameProcessorFps={10}
-                  orientation={"landscapeRight"}
+                  flashMode={flashModeOn ? FlashMode.on : FlashMode.off}
+                  onFacesDetected={handleFacesDetected}
+                  faceDetectorSettings={{
+                    mode: FaceDetector.FaceDetectorMode.fast,
+                    detectLandmarks: FaceDetector.FaceDetectorLandmarks.none,
+                    runClassifications:
+                      FaceDetector.FaceDetectorClassifications.none,
+                    minDetectionInterval: 100,
+                    tracking: true,
+                  }}
                 />
                 <Image
                   source={require("../../assets/photoScanRingIcon.png")}
@@ -167,7 +182,7 @@ function CameraScreen({ navigation }) {
                         borderColor:
                           faces.length === 1 ? "#23DC3D" : Colors.pink,
                       }}
-                      onPress={takePicture.bind(this)}
+                      onPress={takePicture}
                     />
                   </View>
                 </View>
@@ -175,12 +190,6 @@ function CameraScreen({ navigation }) {
             </View>
           </View>
         </>
-      ) : (
-        <Background>
-          <View>
-            <Text>Sorry, your camera is not available now!</Text>
-          </View>
-        </Background>
       )}
     </>
   );
