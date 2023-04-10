@@ -8,6 +8,7 @@ import RequestAccessCard from "../components/RequestAccessCard";
 
 const AccessManagementScreen = ({ navigation }) => {
   const currUser = useSelector((state) => state.user);
+  const notificationSlice = useSelector((state) => state.notification);
 
   const [visible, setVisible] = useState(false);
   const [listRequest, setListRequest] = useState([]);
@@ -22,7 +23,7 @@ const AccessManagementScreen = ({ navigation }) => {
     };
     fetchListRequest();
     return () => {};
-  }, []);
+  }, [notificationSlice.message]);
 
   const showUpdateFaceDialog = () => setVisible(true);
 

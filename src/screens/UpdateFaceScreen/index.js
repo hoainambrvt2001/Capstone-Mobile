@@ -67,8 +67,8 @@ function CameraScreen({ navigation }) {
     let capturedPhoto = await cameraRef.current.takePictureAsync(options);
     const resizePhoto = await ImageManipulator.manipulateAsync(
       capturedPhoto.uri,
-      [{ resize: { width: 400, height: 300 } }],
-      { compress: 0.5 }
+      [{ resize: { width: 500, height: 375 } }],
+      { compress: 1 }
     );
     const photoPath = resizePhoto.uri;
     const photoName =

@@ -33,8 +33,8 @@ const HomeScreen = () => {
   useEffect(() => {
     const getWeatherData = async (location) => {
       if (location && !weatherData) {
-        // const fetchData = await fetchWeatherData(location.coords);
-        // setWeatherData(fetchData);
+        const fetchData = await fetchWeatherData(location.coords);
+        setWeatherData(fetchData);
       }
     };
     getWeatherData(location);
@@ -80,7 +80,7 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.white,
     alignItems: "center",
     justifyContent: "space-between",
-    paddingHorizontal: 20,
+    paddingLeft: 20,
     maxWidth: 340,
   },
   title_wrapper: {
