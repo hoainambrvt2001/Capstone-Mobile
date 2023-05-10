@@ -7,9 +7,9 @@ import TextInputIcon from "../components/TextInputIcon";
 import { Formik } from "formik";
 import * as Yup from "yup";
 import { useDispatch, useSelector } from "react-redux";
-import { uploadAvatarImage } from "../firebase";
 import { updateUserById } from "../store/reducers/userSlice";
 import { setNotification } from "../store/reducers/notificationSlice";
+import mime from "mime";
 
 const EditProfileScreen = ({ navigation }) => {
   const dispatch = useDispatch();
@@ -20,7 +20,9 @@ const EditProfileScreen = ({ navigation }) => {
     email: Yup.string().email().required("Email is a required field."),
     phone_number: Yup.string(),
     photo_url: Yup.string(),
+    avatar_images: Yup.mixed(),
   });
+
   const pickImage = async (setFieldValue) => {
     let result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.All,
@@ -29,24 +31,26 @@ const EditProfileScreen = ({ navigation }) => {
       quality: 1,
     });
     if (!result.canceled) {
+      const fileUri = result.assets[0].uri;
+      const fileName = fileUri.split("/").pop();
+      const fileType = mime.getType(fileUri);
       setFieldValue("photo_url", result.assets[0].uri);
+      setFieldValue("avatar_images", {
+        uri: fileUri,
+        type: fileType,
+        name: fileName,
+      });
     }
   };
+
   const handleEditProfile = async (values, actions) => {
-    let photoUrl = "";
-    let photoName = "";
-    if (values.photo_url !== user.photoURL) {
-      photoName = `${user.uid}.jpg`;
-      photoUrl = await uploadAvatarImage(values.photo_url, photoName);
-    }
-    dispatch(
-      updateUserById({
-        id: user.uid,
-        photo_url: photoUrl,
-        name: values.name,
-        phone_number: values.phone_number,
-      })
-    );
+    const updateUserData = {
+      token: user.token,
+      name: values.name,
+      phone_number: values.phone_number,
+      avatar_images: values.avatar_images,
+    };
+    dispatch(updateUserById(updateUserData));
     dispatch(setNotification("Update information successfully!"));
     actions.setSubmitting(false);
     navigation.goBack();
@@ -69,6 +73,7 @@ const EditProfileScreen = ({ navigation }) => {
               email: user.email,
               phone_number: user.phoneNumber,
               photo_url: user.photoURL,
+              photo_file: null,
             }}
             enableReinitialize={true}
             initialTouched={{

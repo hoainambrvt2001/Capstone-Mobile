@@ -2,7 +2,6 @@ import React, { useState, useEffect, useRef } from "react";
 import { TouchableOpacity, View, Image, Text } from "react-native";
 import { Appbar } from "react-native-paper";
 import { useSelector } from "react-redux";
-import { uploadImageToTrain } from "../../firebase";
 import styles from "./Styles";
 
 import { useDispatch } from "react-redux";
@@ -17,7 +16,7 @@ import * as ImageManipulator from "expo-image-manipulator";
 
 function CameraScreen({ navigation }) {
   const dispatch = useDispatch();
-  const currUser = useSelector((state) => state.user);
+  const user = useSelector((state) => state.user);
   const cameraRef = useRef(null);
   const [cameraType, setCameraType] = useState(CameraType.front);
   const [hasCameraPermission, setHasCameraPermission] = useState();
@@ -61,37 +60,34 @@ function CameraScreen({ navigation }) {
   }
 
   const takePicture = async () => {
-    let options = {
-      quality: 1,
-    };
-    let capturedPhoto = await cameraRef.current.takePictureAsync(options);
-    const resizePhoto = await ImageManipulator.manipulateAsync(
-      capturedPhoto.uri,
-      [{ resize: { width: 500, height: 375 } }],
-      { compress: 1 }
-    );
-    const photoPath = resizePhoto.uri;
-    const photoName =
-      currUser.registeredFaces.length === 2
-        ? `${currUser.uid}-0.jpg`
-        : `${currUser.uid}-${currUser.registeredFaces.length}.jpg`;
-    const result = await uploadImageToTrain(photoPath, photoName);
-    if (result) {
-      const newRegisteredFaces = currUser.registeredFaces.map((item) => item);
-      newRegisteredFaces.push({
-        name: photoName,
-        url: result,
+    try {
+      let capturedPhoto = await cameraRef.current.takePictureAsync({
+        quality: 1,
       });
+      const resizePhoto = await ImageManipulator.manipulateAsync(
+        capturedPhoto.uri,
+        [{ resize: { width: 500, height: 375 } }],
+        { compress: 1 }
+      );
+      const fileUri = resizePhoto.uri;
+      const fileName =
+        user.registeredFaces.length === 2
+          ? `${user.uid}-0.jpg`
+          : `${user.uid}-${user.registeredFaces.length}.jpg`;
+      const fileType = mime.getType(fileUri);
       dispatch(
         updateUserById({
           token: currUser.token,
-          id: currUser.uid,
-          registered_faces: newRegisteredFaces,
+          face_images: {
+            uri: fileUri,
+            type: fileType,
+            name: fileName,
+          },
         })
       );
       dispatch(setNotification("Update face successfully!"));
       navigation.goBack();
-    } else {
+    } catch (e) {
       dispatch(setNotification("Failed to update face!"));
     }
   };

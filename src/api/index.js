@@ -31,20 +31,26 @@ export const fetchMe = async (params) => {
     },
   };
   return await axiosClient
-    .get(`auth/me`, config)
+    .get(`user/info/me`, config)
     .then((res) => res.data)
     .catch((e) => console.log(e));
 };
 
-export const updateUserWithId = async (params) => {
-  const { id, token, updateData } = params;
+export const updateMe = async (params) => {
+  const { token, updateData } = params;
   const config = {
     headers: {
       Authorization: `Bearer ${token}`,
+      "Content-Type": "multipart/form-data",
     },
   };
+  const updateFormData = new FormData();
+  for (let key in updateData) {
+    updateFormData.append(key, updateData[key]);
+  }
+
   return await axiosClient
-    .patch(`user/${id}`, updateData, config)
+    .post(`user/info/me`, updateFormData, config)
     .then((res) => res.data)
     .catch((e) => console.log(e));
 };

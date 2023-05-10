@@ -3,7 +3,7 @@ import {
   createUserWithEmailAndPassword,
   fetchMe,
   signInWithEmailAndPassword,
-  updateUserWithId,
+  updateMe,
 } from "../../api";
 
 const initialState = {
@@ -59,11 +59,10 @@ export const updateUserById = createAsyncThunk(
     let updateData = {};
     if (params.name) updateData.name = params.name;
     if (params.phone_number) updateData.phone_number = params.phone_number;
-    if (params.photo_url) updateData.photo_url = params.photo_url;
-    if (params.registered_faces)
-      updateData.registered_faces = params.registered_faces;
-    await updateUserWithId({ token: params.token, id: params.id, updateData });
-    return updateData;
+    if (params.avatar_images) updateData.avatar_images = params.avatar_images;
+    if (params.face_images) updateData.face_images = params.face_images;
+    const updateResponse = await updateMe({ token: params.token, updateData });
+    return updateResponse;
   }
 );
 
@@ -104,6 +103,7 @@ const UserSlice = createSlice({
     });
     builder.addCase(fetchMyInfo.fulfilled, (state, action) => {
       const { user, token, expiration_time } = action.payload;
+      console.log(user);
       state.uid = user.id;
       state.email = user.email;
       state.name = user.name;
@@ -114,12 +114,14 @@ const UserSlice = createSlice({
       state.tokenExpirationTime = expiration_time;
     });
     builder.addCase(updateUserById.fulfilled, (state, action) => {
-      const { name, photo_url, phone_number, registered_faces } =
-        action.payload;
-      if (name) state.name = name;
-      if (photo_url) state.photoURL = photo_url;
-      if (phone_number) state.phoneNumber = phone_number;
-      if (registered_faces) state.registeredFaces = registered_faces;
+      if (action.payload && action.payload.status_code === 201) {
+        const { name, photo_url, phone_number, registered_faces } =
+          action.payload.data;
+        if (name) state.name = name;
+        if (photo_url) state.photoURL = photo_url;
+        if (phone_number) state.phoneNumber = phone_number;
+        if (registered_faces) state.registeredFaces = registered_faces;
+      }
     });
   },
 });
