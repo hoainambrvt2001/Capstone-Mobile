@@ -1,5 +1,5 @@
 import React, { useEffect, useReducer, useMemo, createContext } from "react";
-import { Dimensions, View, Text } from "react-native";
+import { Dimensions, View, Text, LogBox } from "react-native";
 import EStyleSheet from "react-native-extended-stylesheet";
 import { NavigationContainer } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
@@ -12,7 +12,9 @@ import {
   MainScreen,
   EditProfileScreen,
   UpdateFaceScreen,
-  RequestAdminScreen,
+  InitialCameraScreen,
+  InitialRequestAccessScreen,
+  RequestAccessScreen,
 } from "./src/screens";
 import { Provider as StoreProvider } from "react-redux";
 import store from "./src/store";
@@ -24,6 +26,8 @@ import { AuthContext } from "./src/auth";
 const Stack = createNativeStackNavigator();
 
 const { width } = Dimensions.get("window");
+
+LogBox.ignoreAllLogs(); //Ignore all log notifications
 
 EStyleSheet.build({ $rem: width / 375 });
 
@@ -157,11 +161,19 @@ export default function App() {
                     component={UpdateFaceScreen}
                   />
                   <Stack.Screen
-                    name="RequestAdminScreen"
-                    component={RequestAdminScreen}
+                    name="RequestAccessScreen"
+                    component={RequestAccessScreen}
                   />
                 </>
               )}
+              <Stack.Screen
+                name="InitialRequestAccessScreen"
+                component={InitialRequestAccessScreen}
+              />
+              <Stack.Screen
+                name="InitialCameraScreen"
+                component={InitialCameraScreen}
+              />
               <Stack.Screen
                 name="ResetPasswordScreen"
                 component={ResetPasswordScreen}

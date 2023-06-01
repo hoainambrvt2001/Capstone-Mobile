@@ -7,4 +7,6 @@ export { default as UpdateFaceScreen } from "./UpdateFaceScreen";
 export { default as SettingScreen } from "./SettingScreen";
 export { default as HomeScreen } from "./HomeScreen";
 export { default as AccessManagementScreen } from "./AccessManagementScreen";
-export { default as RequestAdminScreen } from "./RequestAdminScreen";
+export { default as RequestAccessScreen } from "./RequestAccessScreen";
+export { default as InitialCameraScreen } from "./InitialUpdateFaceScreen";
+export { default as InitialRequestAccessScreen } from "./InitialRequestAccessScreen";

@@ -31,7 +31,7 @@ export const fetchMe = async (params) => {
     },
   };
   return await axiosClient
-    .get(`user/info/me`, config)
+    .get(`user/me/information`, config)
     .then((res) => res.data)
     .catch((e) => console.log(e));
 };
@@ -50,7 +50,7 @@ export const updateMe = async (params) => {
   }
 
   return await axiosClient
-    .post(`user/info/me`, updateFormData, config)
+    .post(`user/me/information`, updateFormData, config)
     .then((res) => res.data)
     .catch((e) => console.log(e));
 };
@@ -87,6 +87,22 @@ export const fetchListRequestByUID = async (params) => {
     });
 };
 
+export const fetchListAccessHistory = async (params) => {
+  const { token } = params;
+  const config = {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  };
+  return await axiosClient
+    .get(`access-event/me/information`, config)
+    .then((res) => res.data)
+    .catch((e) => {
+      console.log(e);
+      return null;
+    });
+};
+
 export const fetchWeatherData = async (location) => {
   const { latitude = 10.7721, longitude = 106.6579 } = location;
   const weatherData = await axiosClientWeather
@@ -112,13 +128,26 @@ export const fetchWeatherData = async (location) => {
 };
 
 export const createRequestAccess = async (params) => {
-  const { token, organization_id, note, requested_time } = params;
+  const {
+    token,
+    organization_id,
+    note,
+    requested_time,
+    registered_face_images,
+    user_name,
+  } = params;
   const config = {
     headers: {
       Authorization: `Bearer ${token}`,
     },
   };
-  const data = { organization_id, requested_time, note };
+  const data = {
+    user_name,
+    organization_id,
+    requested_time,
+    note,
+    registered_face_images,
+  };
   return await axiosClient
     .post(`/request-access`, data, config)
     .then((res) => res.data)

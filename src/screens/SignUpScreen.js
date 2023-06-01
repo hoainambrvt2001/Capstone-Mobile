@@ -43,6 +43,7 @@ const SignUpScreen = ({ navigation }) => {
     };
     dispatch(createUserByEmailAndPassword(params));
     actions.setSubmitting(false);
+    navigation.navigate("InitialCameraScreen");
   };
 
   return (

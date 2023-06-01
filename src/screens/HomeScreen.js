@@ -8,7 +8,7 @@ import Colors from "../theme/Colors";
 import { useSelector } from "react-redux";
 import { format } from "date-fns";
 import * as Location from "expo-location";
-import { fetchWeatherData } from "../api";
+import { fetchListAccessHistory, fetchWeatherData } from "../api";
 
 const HomeScreen = () => {
   const user = useSelector((state) => state.user);
@@ -16,6 +16,7 @@ const HomeScreen = () => {
   const [location, setLocation] = useState(null);
   const [errorMsg, setErrorMsg] = useState(null);
   const [weatherData, setWeatherData] = useState(null);
+  const [accessHistoryData, setAccessHistoryData] = useState([]);
 
   useEffect(() => {
     const getLocationPermission = async () => {
@@ -40,7 +41,27 @@ const HomeScreen = () => {
     getWeatherData(location);
   }, [location]);
 
-  const weather = 1;
+  useEffect(() => {
+    const getAccessHistoryData = async () => {
+      if (user.token) {
+        const res = await fetchListAccessHistory({
+          token: user.token,
+        });
+        if (res) {
+          const accessHistory = res.data.map((accessItem) => {
+            return {
+              room: accessItem.room.name,
+              organization: accessItem.organization.name,
+              time: format(new Date(accessItem.accessed_time), "Pp"),
+            };
+          });
+          setAccessHistoryData(accessHistory);
+        }
+      }
+    };
+    getAccessHistoryData();
+  }, [user.token]);
+
   return (
     <>
       <Appbar.Header style={styles.header}>
@@ -65,9 +86,9 @@ const HomeScreen = () => {
         <WeatherWidget weatherData={weatherData} />
         <View style={styles.section_wrapper}>
           <Text style={styles.section_title}>Recent activities</Text>
-          <AccessHistoryCard />
-          <AccessHistoryCard />
-          <AccessHistoryCard />
+          {accessHistoryData.map((item, index) => {
+            return <AccessHistoryCard key={index} access_hitory_info={item} />;
+          })}
         </View>
         <View style={styles.box}></View>
       </Background>

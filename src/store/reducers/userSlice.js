@@ -103,7 +103,6 @@ const UserSlice = createSlice({
     });
     builder.addCase(fetchMyInfo.fulfilled, (state, action) => {
       const { user, token, expiration_time } = action.payload;
-      console.log(user);
       state.uid = user.id;
       state.email = user.email;
       state.name = user.name;

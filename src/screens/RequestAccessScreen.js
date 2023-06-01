@@ -10,7 +10,7 @@ import { SelectList } from "react-native-dropdown-select-list";
 import { createRequestAccess, fetchOrganizationByName } from "../api";
 import { setNotification } from "../store/reducers/notificationSlice";
 
-const RequestAdminScreen = ({ navigation }) => {
+const RequestAccessScreen = ({ navigation }) => {
   const [queryOrganization, setQueryOrganization] = useState("");
   const [totalOrganization, setTotalOrganization] = useState([]);
   const dispatch = useDispatch();
@@ -55,9 +55,12 @@ const RequestAdminScreen = ({ navigation }) => {
   });
 
   const handleSendRequest = async (values, actions) => {
+    console.log(user);
     const params = {
       token: user.token,
+      user_name: user.name,
       organization_id: values.organization_id,
+      registered_face_images: user.registeredFaces,
       note: values.note,
       requested_time: new Date().toISOString(),
     };
@@ -258,4 +261,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default RequestAdminScreen;
+export default RequestAccessScreen;

@@ -14,6 +14,7 @@ const SettingScreen = ({ navigation }) => {
   const handleSignout = async () => {
     await signOut();
     dispatch(resetUser());
+    navigation.navigate("SignInScreen");
   };
 
   return (

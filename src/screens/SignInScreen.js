@@ -34,6 +34,7 @@ const SignInScreen = ({ navigation }) => {
     };
     dispatch(signInByEmailAndPassword(params));
     actions.setSubmitting(false);
+    navigation.navigate("MainScreen");
   };
 
   return (

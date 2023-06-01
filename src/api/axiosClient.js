@@ -1,7 +1,7 @@
 import axios from "axios";
 
 export const axiosClient = axios.create({
-  baseURL: "http://172.17.80.1:3333/",
+  baseURL: "https://bkaccess-api-v2-24a5yyphpq-as.a.run.app/",
 });
 
 export const axiosClientWeather = axios.create({

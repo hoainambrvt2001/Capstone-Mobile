@@ -19,13 +19,18 @@ const AccessHistoryCard = ({
         <Icon name="walking" style={styles.access_icon} />
       </View>
       <View style={styles.access_text}>
-        <View style={styles.access_location}>
-          <Text style={styles.access_room}>Action: Check-in</Text>
-          <Text style={styles.access_organization}>
-            At: {room} in {organization}
+        <View style={{ flexDirection: "row" }}>
+          <Text style={styles.access_action}>{"Check in: "}</Text>
+          <Text style={styles.access_time}>{time}</Text>
+        </View>
+        <View style={{ flexDirection: "column" }}>
+          <Text style={styles.access_room} numberOfLines={1}>
+            In room: {room}
+          </Text>
+          <Text style={styles.access_organization} numberOfLines={1}>
+            At: {organization}
           </Text>
         </View>
-        <Text style={styles.access_time}>{time}</Text>
       </View>
     </View>
   );
@@ -56,14 +61,21 @@ const styles = EStyleSheet.create({
   },
   access_text: {
     paddingLeft: "19rem",
-    flexDirection: "row",
+    flexDirection: "column",
   },
-  access_room: {
+  access_action: {
     lineHeight: "21rem",
     color: Colors.black,
     marginBottom: "5rem",
     fontSize: Fonts.size.normalText,
     fontWeight: "bold",
+  },
+  access_room: {
+    lineHeight: "18rem",
+    color: Colors.darkGray,
+    fontSize: Fonts.size.medium,
+    marginBottom: "5rem",
+    fontWeight: "normal",
   },
   access_organization: {
     lineHeight: "18rem",

@@ -32,7 +32,7 @@ const AccessManagementScreen = ({ navigation }) => {
   const handleRequestAdmin = () => {
     if (!currUser) return;
     if (currUser.registeredFaces.length !== 0) {
-      navigation.push("RequestAdminScreen");
+      navigation.push("RequestAccessScreen");
     } else {
       showUpdateFaceDialog();
     }

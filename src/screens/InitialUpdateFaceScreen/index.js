@@ -13,8 +13,12 @@ import Colors from "../../theme/Colors";
 import { Camera, CameraType, FlashMode } from "expo-camera";
 import * as FaceDetector from "expo-face-detector";
 import * as ImageManipulator from "expo-image-manipulator";
+import Button from "../../components/Button";
 
-function CameraScreen({ navigation }) {
+// Extract file:
+import mime from "mime";
+
+function InitialCameraScreen({ navigation }) {
   const dispatch = useDispatch();
   const user = useSelector((state) => state.user);
   const cameraRef = useRef(null);
@@ -37,7 +41,7 @@ function CameraScreen({ navigation }) {
         <Appbar.Header mode="center-aligned" style={styles.header}>
           <Appbar.BackAction
             onPress={() => {
-              navigation.goBack();
+              navigation.navigate("MainScreen");
             }}
           />
           <Appbar.Content title="Update face" titleStyle={styles.headerTitle} />
@@ -50,7 +54,7 @@ function CameraScreen({ navigation }) {
         <Appbar.Header mode="center-aligned" style={styles.header}>
           <Appbar.BackAction
             onPress={() => {
-              navigation.goBack();
+              navigation.navigate("MainScreen");
             }}
           />
           <Appbar.Content title="Update face" titleStyle={styles.headerTitle} />
@@ -86,9 +90,10 @@ function CameraScreen({ navigation }) {
         })
       );
       dispatch(setNotification("Update face successfully!"));
-      navigation.goBack();
+      navigation.navigate("InitialRequestAccessScreen");
     } catch (e) {
       dispatch(setNotification("Failed to update face!"));
+      console.log(e);
     }
   };
 
@@ -99,11 +104,6 @@ function CameraScreen({ navigation }) {
   return (
     <>
       <Appbar.Header mode="center-aligned" style={styles.header}>
-        <Appbar.BackAction
-          onPress={() => {
-            navigation.goBack();
-          }}
-        />
         <Appbar.Content title="Update face" titleStyle={styles.headerTitle} />
       </Appbar.Header>
       {hasCameraPermission === undefined ? (
@@ -181,6 +181,18 @@ function CameraScreen({ navigation }) {
                       onPress={takePicture}
                     />
                   </View>
+                  <Button
+                    mode="contained"
+                    onPress={() => navigation.navigate("MainScreen")}
+                    style={{
+                      width: 150,
+                      alignSelf: "center",
+                      marginTop: 50,
+                      backgroundColor: Colors.pink,
+                    }}
+                  >
+                    Skip for now
+                  </Button>
                 </View>
               </View>
             </View>
@@ -191,4 +203,4 @@ function CameraScreen({ navigation }) {
   );
 }
 
-export default CameraScreen;
+export default InitialCameraScreen;
